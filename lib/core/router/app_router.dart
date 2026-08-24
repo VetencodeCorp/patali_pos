@@ -7,6 +7,7 @@ import '../../features/kitchen/presentation/kitchen_display_screen.dart';
 import '../../features/orders/presentation/order_history_screen.dart';
 import '../../features/orders/presentation/receipt_screen.dart';
 import '../../features/pos/presentation/pos_screen.dart';
+import '../../features/reports/presentation/product_sales_screen.dart';
 import '../../features/reports/presentation/reports_screen.dart';
 import '../../features/reports/presentation/sales_summary_screen.dart';
 import '../../features/settings/presentation/category_management_screen.dart';
@@ -109,6 +110,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: SalesSummaryScreen.routePath,
       builder: (context, state) => const SalesSummaryScreen(),
+    ),
+    GoRoute(
+      path: ProductSalesScreen.routePath,
+      builder: (context, state) => const ProductSalesScreen(),
     ),
   ],
 );

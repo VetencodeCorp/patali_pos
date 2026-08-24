@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/patali_card.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import 'product_sales_screen.dart';
 import 'sales_summary_screen.dart';
 
 class ReportsScreen extends StatelessWidget {
@@ -47,7 +48,7 @@ class ReportsScreen extends StatelessWidget {
             icon: Icons.inventory_2_outlined,
             title: 'Produk Terjual',
             subtitle: 'Produk paling laku dan kuantitas terjual',
-            onTap: () {},
+            onTap: () => context.push(ProductSalesScreen.routePath),
           ),
         ],
       ),

@@ -133,4 +133,56 @@ void main() {
     expect(summary.nonCashSales, 0);
     expect(summary.orderCount, 0);
   });
+
+  test('summarizes product sales and excludes voided orders', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+
+    await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 53000,
+      discountTotal: 0,
+      grandTotal: 53000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 2,
+          unitPrice: 18000,
+          lineTotal: 36000,
+        ),
+        CreateOrderItem(
+          productId: 'prod-roti-bakar',
+          productName: 'Roti Bakar',
+          qty: 1,
+          unitPrice: 17000,
+          lineTotal: 17000,
+        ),
+      ],
+    );
+    final voided = await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 18000,
+      discountTotal: 0,
+      grandTotal: 18000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+      ],
+    );
+    await orders.voidOrder(voided.id);
+
+    final items = await salesSummary.getProductSales(date: DateTime.now());
+
+    expect(items, hasLength(2));
+    expect(items.first.productName, 'Kopi Susu');
+    expect(items.first.qty, 2);
+    expect(items.first.sales, 36000);
+    expect(items.first.orderCount, 1);
+    expect(items.last.productName, 'Roti Bakar');
+  });
 }
