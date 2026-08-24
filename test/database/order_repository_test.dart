@@ -87,6 +87,49 @@ void main() {
     expect(order.orderType, 'Meja');
   });
 
+  test('builds order number from cashier invoice settings', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+
+    final first = await orders.createCashOrder(
+      cashSessionId: session.id,
+      invoicePrefix: 'POS',
+      resetInvoiceDaily: true,
+      subtotal: 18000,
+      discountTotal: 0,
+      grandTotal: 18000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+      ],
+    );
+    final second = await orders.createCashOrder(
+      cashSessionId: session.id,
+      invoicePrefix: 'POS',
+      resetInvoiceDaily: true,
+      subtotal: 18000,
+      discountTotal: 0,
+      grandTotal: 18000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-latte',
+          productName: 'Latte',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+      ],
+    );
+
+    expect(first.orderNumber, startsWith('POS-'));
+    expect(first.orderNumber, endsWith('-0001'));
+    expect(second.orderNumber, endsWith('-0002'));
+  });
+
   test('voids completed order and payment', () async {
     final session = await cashSessions.openSession(openingCash: 0);
     final order = await orders.createCashOrder(

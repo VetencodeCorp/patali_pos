@@ -7,7 +7,9 @@ import '../../features/pos/presentation/pos_screen.dart';
 import '../../features/reports/presentation/reports_screen.dart';
 import '../../features/reports/presentation/sales_summary_screen.dart';
 import '../../features/settings/presentation/category_management_screen.dart';
+import '../../features/settings/presentation/cashier_settings_screen.dart';
 import '../../features/settings/presentation/device_settings_screen.dart';
+import '../../features/settings/presentation/payment_settings_screen.dart';
 import '../../features/settings/presentation/product_form_screen.dart';
 import '../../features/settings/presentation/product_management_screen.dart';
 import '../../features/settings/presentation/receipt_tax_settings_screen.dart';
@@ -68,6 +70,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: DeviceSettingsScreen.routePath,
       builder: (context, state) => const DeviceSettingsScreen(),
+    ),
+    GoRoute(
+      path: CashierSettingsScreen.routePath,
+      builder: (context, state) => const CashierSettingsScreen(),
+    ),
+    GoRoute(
+      path: PaymentSettingsScreen.routePath,
+      builder: (context, state) => const PaymentSettingsScreen(),
     ),
     GoRoute(
       path: ReportsScreen.routePath,

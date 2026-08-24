@@ -7946,6 +7946,1610 @@ class DeviceSettingsCompanion extends UpdateCompanion<DeviceSetting> {
   }
 }
 
+class $CashierSettingsTable extends CashierSettings
+    with TableInfo<$CashierSettingsTable, CashierSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashierSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _invoicePrefixMeta = const VerificationMeta(
+    'invoicePrefix',
+  );
+  @override
+  late final GeneratedColumn<String> invoicePrefix = GeneratedColumn<String>(
+    'invoice_prefix',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('INV'),
+  );
+  static const VerificationMeta _resetInvoiceDailyMeta = const VerificationMeta(
+    'resetInvoiceDaily',
+  );
+  @override
+  late final GeneratedColumn<bool> resetInvoiceDaily = GeneratedColumn<bool>(
+    'reset_invoice_daily',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("reset_invoice_daily" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _defaultPaymentMethodMeta =
+      const VerificationMeta('defaultPaymentMethod');
+  @override
+  late final GeneratedColumn<String> defaultPaymentMethod =
+      GeneratedColumn<String>(
+        'default_payment_method',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('cash'),
+      );
+  static const VerificationMeta _defaultOrderTypeMeta = const VerificationMeta(
+    'defaultOrderType',
+  );
+  @override
+  late final GeneratedColumn<String> defaultOrderType = GeneratedColumn<String>(
+    'default_order_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Bungkus'),
+  );
+  static const VerificationMeta _manualDiscountEnabledMeta =
+      const VerificationMeta('manualDiscountEnabled');
+  @override
+  late final GeneratedColumn<bool> manualDiscountEnabled =
+      GeneratedColumn<bool>(
+        'manual_discount_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("manual_discount_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _customerRequiredMeta = const VerificationMeta(
+    'customerRequired',
+  );
+  @override
+  late final GeneratedColumn<bool> customerRequired = GeneratedColumn<bool>(
+    'customer_required',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("customer_required" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    invoicePrefix,
+    resetInvoiceDaily,
+    defaultPaymentMethod,
+    defaultOrderType,
+    manualDiscountEnabled,
+    customerRequired,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cashier_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CashierSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('invoice_prefix')) {
+      context.handle(
+        _invoicePrefixMeta,
+        invoicePrefix.isAcceptableOrUnknown(
+          data['invoice_prefix']!,
+          _invoicePrefixMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reset_invoice_daily')) {
+      context.handle(
+        _resetInvoiceDailyMeta,
+        resetInvoiceDaily.isAcceptableOrUnknown(
+          data['reset_invoice_daily']!,
+          _resetInvoiceDailyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_payment_method')) {
+      context.handle(
+        _defaultPaymentMethodMeta,
+        defaultPaymentMethod.isAcceptableOrUnknown(
+          data['default_payment_method']!,
+          _defaultPaymentMethodMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_order_type')) {
+      context.handle(
+        _defaultOrderTypeMeta,
+        defaultOrderType.isAcceptableOrUnknown(
+          data['default_order_type']!,
+          _defaultOrderTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('manual_discount_enabled')) {
+      context.handle(
+        _manualDiscountEnabledMeta,
+        manualDiscountEnabled.isAcceptableOrUnknown(
+          data['manual_discount_enabled']!,
+          _manualDiscountEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('customer_required')) {
+      context.handle(
+        _customerRequiredMeta,
+        customerRequired.isAcceptableOrUnknown(
+          data['customer_required']!,
+          _customerRequiredMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CashierSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashierSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      invoicePrefix: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}invoice_prefix'],
+      )!,
+      resetInvoiceDaily: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}reset_invoice_daily'],
+      )!,
+      defaultPaymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_payment_method'],
+      )!,
+      defaultOrderType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_order_type'],
+      )!,
+      manualDiscountEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}manual_discount_enabled'],
+      )!,
+      customerRequired: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}customer_required'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $CashierSettingsTable createAlias(String alias) {
+    return $CashierSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class CashierSetting extends DataClass implements Insertable<CashierSetting> {
+  final String id;
+  final String invoicePrefix;
+  final bool resetInvoiceDaily;
+  final String defaultPaymentMethod;
+  final String defaultOrderType;
+  final bool manualDiscountEnabled;
+  final bool customerRequired;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const CashierSetting({
+    required this.id,
+    required this.invoicePrefix,
+    required this.resetInvoiceDaily,
+    required this.defaultPaymentMethod,
+    required this.defaultOrderType,
+    required this.manualDiscountEnabled,
+    required this.customerRequired,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['invoice_prefix'] = Variable<String>(invoicePrefix);
+    map['reset_invoice_daily'] = Variable<bool>(resetInvoiceDaily);
+    map['default_payment_method'] = Variable<String>(defaultPaymentMethod);
+    map['default_order_type'] = Variable<String>(defaultOrderType);
+    map['manual_discount_enabled'] = Variable<bool>(manualDiscountEnabled);
+    map['customer_required'] = Variable<bool>(customerRequired);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  CashierSettingsCompanion toCompanion(bool nullToAbsent) {
+    return CashierSettingsCompanion(
+      id: Value(id),
+      invoicePrefix: Value(invoicePrefix),
+      resetInvoiceDaily: Value(resetInvoiceDaily),
+      defaultPaymentMethod: Value(defaultPaymentMethod),
+      defaultOrderType: Value(defaultOrderType),
+      manualDiscountEnabled: Value(manualDiscountEnabled),
+      customerRequired: Value(customerRequired),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory CashierSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashierSetting(
+      id: serializer.fromJson<String>(json['id']),
+      invoicePrefix: serializer.fromJson<String>(json['invoicePrefix']),
+      resetInvoiceDaily: serializer.fromJson<bool>(json['resetInvoiceDaily']),
+      defaultPaymentMethod: serializer.fromJson<String>(
+        json['defaultPaymentMethod'],
+      ),
+      defaultOrderType: serializer.fromJson<String>(json['defaultOrderType']),
+      manualDiscountEnabled: serializer.fromJson<bool>(
+        json['manualDiscountEnabled'],
+      ),
+      customerRequired: serializer.fromJson<bool>(json['customerRequired']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'invoicePrefix': serializer.toJson<String>(invoicePrefix),
+      'resetInvoiceDaily': serializer.toJson<bool>(resetInvoiceDaily),
+      'defaultPaymentMethod': serializer.toJson<String>(defaultPaymentMethod),
+      'defaultOrderType': serializer.toJson<String>(defaultOrderType),
+      'manualDiscountEnabled': serializer.toJson<bool>(manualDiscountEnabled),
+      'customerRequired': serializer.toJson<bool>(customerRequired),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  CashierSetting copyWith({
+    String? id,
+    String? invoicePrefix,
+    bool? resetInvoiceDaily,
+    String? defaultPaymentMethod,
+    String? defaultOrderType,
+    bool? manualDiscountEnabled,
+    bool? customerRequired,
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => CashierSetting(
+    id: id ?? this.id,
+    invoicePrefix: invoicePrefix ?? this.invoicePrefix,
+    resetInvoiceDaily: resetInvoiceDaily ?? this.resetInvoiceDaily,
+    defaultPaymentMethod: defaultPaymentMethod ?? this.defaultPaymentMethod,
+    defaultOrderType: defaultOrderType ?? this.defaultOrderType,
+    manualDiscountEnabled: manualDiscountEnabled ?? this.manualDiscountEnabled,
+    customerRequired: customerRequired ?? this.customerRequired,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  CashierSetting copyWithCompanion(CashierSettingsCompanion data) {
+    return CashierSetting(
+      id: data.id.present ? data.id.value : this.id,
+      invoicePrefix: data.invoicePrefix.present
+          ? data.invoicePrefix.value
+          : this.invoicePrefix,
+      resetInvoiceDaily: data.resetInvoiceDaily.present
+          ? data.resetInvoiceDaily.value
+          : this.resetInvoiceDaily,
+      defaultPaymentMethod: data.defaultPaymentMethod.present
+          ? data.defaultPaymentMethod.value
+          : this.defaultPaymentMethod,
+      defaultOrderType: data.defaultOrderType.present
+          ? data.defaultOrderType.value
+          : this.defaultOrderType,
+      manualDiscountEnabled: data.manualDiscountEnabled.present
+          ? data.manualDiscountEnabled.value
+          : this.manualDiscountEnabled,
+      customerRequired: data.customerRequired.present
+          ? data.customerRequired.value
+          : this.customerRequired,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashierSetting(')
+          ..write('id: $id, ')
+          ..write('invoicePrefix: $invoicePrefix, ')
+          ..write('resetInvoiceDaily: $resetInvoiceDaily, ')
+          ..write('defaultPaymentMethod: $defaultPaymentMethod, ')
+          ..write('defaultOrderType: $defaultOrderType, ')
+          ..write('manualDiscountEnabled: $manualDiscountEnabled, ')
+          ..write('customerRequired: $customerRequired, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    invoicePrefix,
+    resetInvoiceDaily,
+    defaultPaymentMethod,
+    defaultOrderType,
+    manualDiscountEnabled,
+    customerRequired,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashierSetting &&
+          other.id == this.id &&
+          other.invoicePrefix == this.invoicePrefix &&
+          other.resetInvoiceDaily == this.resetInvoiceDaily &&
+          other.defaultPaymentMethod == this.defaultPaymentMethod &&
+          other.defaultOrderType == this.defaultOrderType &&
+          other.manualDiscountEnabled == this.manualDiscountEnabled &&
+          other.customerRequired == this.customerRequired &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CashierSettingsCompanion extends UpdateCompanion<CashierSetting> {
+  final Value<String> id;
+  final Value<String> invoicePrefix;
+  final Value<bool> resetInvoiceDaily;
+  final Value<String> defaultPaymentMethod;
+  final Value<String> defaultOrderType;
+  final Value<bool> manualDiscountEnabled;
+  final Value<bool> customerRequired;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const CashierSettingsCompanion({
+    this.id = const Value.absent(),
+    this.invoicePrefix = const Value.absent(),
+    this.resetInvoiceDaily = const Value.absent(),
+    this.defaultPaymentMethod = const Value.absent(),
+    this.defaultOrderType = const Value.absent(),
+    this.manualDiscountEnabled = const Value.absent(),
+    this.customerRequired = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashierSettingsCompanion.insert({
+    required String id,
+    this.invoicePrefix = const Value.absent(),
+    this.resetInvoiceDaily = const Value.absent(),
+    this.defaultPaymentMethod = const Value.absent(),
+    this.defaultOrderType = const Value.absent(),
+    this.manualDiscountEnabled = const Value.absent(),
+    this.customerRequired = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<CashierSetting> custom({
+    Expression<String>? id,
+    Expression<String>? invoicePrefix,
+    Expression<bool>? resetInvoiceDaily,
+    Expression<String>? defaultPaymentMethod,
+    Expression<String>? defaultOrderType,
+    Expression<bool>? manualDiscountEnabled,
+    Expression<bool>? customerRequired,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (invoicePrefix != null) 'invoice_prefix': invoicePrefix,
+      if (resetInvoiceDaily != null) 'reset_invoice_daily': resetInvoiceDaily,
+      if (defaultPaymentMethod != null)
+        'default_payment_method': defaultPaymentMethod,
+      if (defaultOrderType != null) 'default_order_type': defaultOrderType,
+      if (manualDiscountEnabled != null)
+        'manual_discount_enabled': manualDiscountEnabled,
+      if (customerRequired != null) 'customer_required': customerRequired,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashierSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? invoicePrefix,
+    Value<bool>? resetInvoiceDaily,
+    Value<String>? defaultPaymentMethod,
+    Value<String>? defaultOrderType,
+    Value<bool>? manualDiscountEnabled,
+    Value<bool>? customerRequired,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CashierSettingsCompanion(
+      id: id ?? this.id,
+      invoicePrefix: invoicePrefix ?? this.invoicePrefix,
+      resetInvoiceDaily: resetInvoiceDaily ?? this.resetInvoiceDaily,
+      defaultPaymentMethod: defaultPaymentMethod ?? this.defaultPaymentMethod,
+      defaultOrderType: defaultOrderType ?? this.defaultOrderType,
+      manualDiscountEnabled:
+          manualDiscountEnabled ?? this.manualDiscountEnabled,
+      customerRequired: customerRequired ?? this.customerRequired,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (invoicePrefix.present) {
+      map['invoice_prefix'] = Variable<String>(invoicePrefix.value);
+    }
+    if (resetInvoiceDaily.present) {
+      map['reset_invoice_daily'] = Variable<bool>(resetInvoiceDaily.value);
+    }
+    if (defaultPaymentMethod.present) {
+      map['default_payment_method'] = Variable<String>(
+        defaultPaymentMethod.value,
+      );
+    }
+    if (defaultOrderType.present) {
+      map['default_order_type'] = Variable<String>(defaultOrderType.value);
+    }
+    if (manualDiscountEnabled.present) {
+      map['manual_discount_enabled'] = Variable<bool>(
+        manualDiscountEnabled.value,
+      );
+    }
+    if (customerRequired.present) {
+      map['customer_required'] = Variable<bool>(customerRequired.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashierSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('invoicePrefix: $invoicePrefix, ')
+          ..write('resetInvoiceDaily: $resetInvoiceDaily, ')
+          ..write('defaultPaymentMethod: $defaultPaymentMethod, ')
+          ..write('defaultOrderType: $defaultOrderType, ')
+          ..write('manualDiscountEnabled: $manualDiscountEnabled, ')
+          ..write('customerRequired: $customerRequired, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PaymentSettingsTable extends PaymentSettings
+    with TableInfo<$PaymentSettingsTable, PaymentSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PaymentSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qrisEnabledMeta = const VerificationMeta(
+    'qrisEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> qrisEnabled = GeneratedColumn<bool>(
+    'qris_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("qris_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _qrisProviderMeta = const VerificationMeta(
+    'qrisProvider',
+  );
+  @override
+  late final GeneratedColumn<String> qrisProvider = GeneratedColumn<String>(
+    'qris_provider',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _qrisMerchantIdMeta = const VerificationMeta(
+    'qrisMerchantId',
+  );
+  @override
+  late final GeneratedColumn<String> qrisMerchantId = GeneratedColumn<String>(
+    'qris_merchant_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _qrisInstructionMeta = const VerificationMeta(
+    'qrisInstruction',
+  );
+  @override
+  late final GeneratedColumn<String> qrisInstruction = GeneratedColumn<String>(
+    'qris_instruction',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _debitEnabledMeta = const VerificationMeta(
+    'debitEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> debitEnabled = GeneratedColumn<bool>(
+    'debit_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("debit_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _debitProviderMeta = const VerificationMeta(
+    'debitProvider',
+  );
+  @override
+  late final GeneratedColumn<String> debitProvider = GeneratedColumn<String>(
+    'debit_provider',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _debitMerchantIdMeta = const VerificationMeta(
+    'debitMerchantId',
+  );
+  @override
+  late final GeneratedColumn<String> debitMerchantId = GeneratedColumn<String>(
+    'debit_merchant_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _debitInstructionMeta = const VerificationMeta(
+    'debitInstruction',
+  );
+  @override
+  late final GeneratedColumn<String> debitInstruction = GeneratedColumn<String>(
+    'debit_instruction',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _transferEnabledMeta = const VerificationMeta(
+    'transferEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> transferEnabled = GeneratedColumn<bool>(
+    'transfer_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("transfer_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _transferBankNameMeta = const VerificationMeta(
+    'transferBankName',
+  );
+  @override
+  late final GeneratedColumn<String> transferBankName = GeneratedColumn<String>(
+    'transfer_bank_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _transferAccountNumberMeta =
+      const VerificationMeta('transferAccountNumber');
+  @override
+  late final GeneratedColumn<String> transferAccountNumber =
+      GeneratedColumn<String>(
+        'transfer_account_number',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _transferAccountNameMeta =
+      const VerificationMeta('transferAccountName');
+  @override
+  late final GeneratedColumn<String> transferAccountName =
+      GeneratedColumn<String>(
+        'transfer_account_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _transferInstructionMeta =
+      const VerificationMeta('transferInstruction');
+  @override
+  late final GeneratedColumn<String> transferInstruction =
+      GeneratedColumn<String>(
+        'transfer_instruction',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    qrisEnabled,
+    qrisProvider,
+    qrisMerchantId,
+    qrisInstruction,
+    debitEnabled,
+    debitProvider,
+    debitMerchantId,
+    debitInstruction,
+    transferEnabled,
+    transferBankName,
+    transferAccountNumber,
+    transferAccountName,
+    transferInstruction,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'payment_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PaymentSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('qris_enabled')) {
+      context.handle(
+        _qrisEnabledMeta,
+        qrisEnabled.isAcceptableOrUnknown(
+          data['qris_enabled']!,
+          _qrisEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('qris_provider')) {
+      context.handle(
+        _qrisProviderMeta,
+        qrisProvider.isAcceptableOrUnknown(
+          data['qris_provider']!,
+          _qrisProviderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('qris_merchant_id')) {
+      context.handle(
+        _qrisMerchantIdMeta,
+        qrisMerchantId.isAcceptableOrUnknown(
+          data['qris_merchant_id']!,
+          _qrisMerchantIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('qris_instruction')) {
+      context.handle(
+        _qrisInstructionMeta,
+        qrisInstruction.isAcceptableOrUnknown(
+          data['qris_instruction']!,
+          _qrisInstructionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debit_enabled')) {
+      context.handle(
+        _debitEnabledMeta,
+        debitEnabled.isAcceptableOrUnknown(
+          data['debit_enabled']!,
+          _debitEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debit_provider')) {
+      context.handle(
+        _debitProviderMeta,
+        debitProvider.isAcceptableOrUnknown(
+          data['debit_provider']!,
+          _debitProviderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debit_merchant_id')) {
+      context.handle(
+        _debitMerchantIdMeta,
+        debitMerchantId.isAcceptableOrUnknown(
+          data['debit_merchant_id']!,
+          _debitMerchantIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debit_instruction')) {
+      context.handle(
+        _debitInstructionMeta,
+        debitInstruction.isAcceptableOrUnknown(
+          data['debit_instruction']!,
+          _debitInstructionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_enabled')) {
+      context.handle(
+        _transferEnabledMeta,
+        transferEnabled.isAcceptableOrUnknown(
+          data['transfer_enabled']!,
+          _transferEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_bank_name')) {
+      context.handle(
+        _transferBankNameMeta,
+        transferBankName.isAcceptableOrUnknown(
+          data['transfer_bank_name']!,
+          _transferBankNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_account_number')) {
+      context.handle(
+        _transferAccountNumberMeta,
+        transferAccountNumber.isAcceptableOrUnknown(
+          data['transfer_account_number']!,
+          _transferAccountNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_account_name')) {
+      context.handle(
+        _transferAccountNameMeta,
+        transferAccountName.isAcceptableOrUnknown(
+          data['transfer_account_name']!,
+          _transferAccountNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_instruction')) {
+      context.handle(
+        _transferInstructionMeta,
+        transferInstruction.isAcceptableOrUnknown(
+          data['transfer_instruction']!,
+          _transferInstructionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PaymentSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PaymentSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      qrisEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}qris_enabled'],
+      )!,
+      qrisProvider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}qris_provider'],
+      ),
+      qrisMerchantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}qris_merchant_id'],
+      ),
+      qrisInstruction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}qris_instruction'],
+      ),
+      debitEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}debit_enabled'],
+      )!,
+      debitProvider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}debit_provider'],
+      ),
+      debitMerchantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}debit_merchant_id'],
+      ),
+      debitInstruction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}debit_instruction'],
+      ),
+      transferEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}transfer_enabled'],
+      )!,
+      transferBankName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transfer_bank_name'],
+      ),
+      transferAccountNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transfer_account_number'],
+      ),
+      transferAccountName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transfer_account_name'],
+      ),
+      transferInstruction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transfer_instruction'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $PaymentSettingsTable createAlias(String alias) {
+    return $PaymentSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
+  final String id;
+  final bool qrisEnabled;
+  final String? qrisProvider;
+  final String? qrisMerchantId;
+  final String? qrisInstruction;
+  final bool debitEnabled;
+  final String? debitProvider;
+  final String? debitMerchantId;
+  final String? debitInstruction;
+  final bool transferEnabled;
+  final String? transferBankName;
+  final String? transferAccountNumber;
+  final String? transferAccountName;
+  final String? transferInstruction;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const PaymentSetting({
+    required this.id,
+    required this.qrisEnabled,
+    this.qrisProvider,
+    this.qrisMerchantId,
+    this.qrisInstruction,
+    required this.debitEnabled,
+    this.debitProvider,
+    this.debitMerchantId,
+    this.debitInstruction,
+    required this.transferEnabled,
+    this.transferBankName,
+    this.transferAccountNumber,
+    this.transferAccountName,
+    this.transferInstruction,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['qris_enabled'] = Variable<bool>(qrisEnabled);
+    if (!nullToAbsent || qrisProvider != null) {
+      map['qris_provider'] = Variable<String>(qrisProvider);
+    }
+    if (!nullToAbsent || qrisMerchantId != null) {
+      map['qris_merchant_id'] = Variable<String>(qrisMerchantId);
+    }
+    if (!nullToAbsent || qrisInstruction != null) {
+      map['qris_instruction'] = Variable<String>(qrisInstruction);
+    }
+    map['debit_enabled'] = Variable<bool>(debitEnabled);
+    if (!nullToAbsent || debitProvider != null) {
+      map['debit_provider'] = Variable<String>(debitProvider);
+    }
+    if (!nullToAbsent || debitMerchantId != null) {
+      map['debit_merchant_id'] = Variable<String>(debitMerchantId);
+    }
+    if (!nullToAbsent || debitInstruction != null) {
+      map['debit_instruction'] = Variable<String>(debitInstruction);
+    }
+    map['transfer_enabled'] = Variable<bool>(transferEnabled);
+    if (!nullToAbsent || transferBankName != null) {
+      map['transfer_bank_name'] = Variable<String>(transferBankName);
+    }
+    if (!nullToAbsent || transferAccountNumber != null) {
+      map['transfer_account_number'] = Variable<String>(transferAccountNumber);
+    }
+    if (!nullToAbsent || transferAccountName != null) {
+      map['transfer_account_name'] = Variable<String>(transferAccountName);
+    }
+    if (!nullToAbsent || transferInstruction != null) {
+      map['transfer_instruction'] = Variable<String>(transferInstruction);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  PaymentSettingsCompanion toCompanion(bool nullToAbsent) {
+    return PaymentSettingsCompanion(
+      id: Value(id),
+      qrisEnabled: Value(qrisEnabled),
+      qrisProvider: qrisProvider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(qrisProvider),
+      qrisMerchantId: qrisMerchantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(qrisMerchantId),
+      qrisInstruction: qrisInstruction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(qrisInstruction),
+      debitEnabled: Value(debitEnabled),
+      debitProvider: debitProvider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(debitProvider),
+      debitMerchantId: debitMerchantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(debitMerchantId),
+      debitInstruction: debitInstruction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(debitInstruction),
+      transferEnabled: Value(transferEnabled),
+      transferBankName: transferBankName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferBankName),
+      transferAccountNumber: transferAccountNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferAccountNumber),
+      transferAccountName: transferAccountName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferAccountName),
+      transferInstruction: transferInstruction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferInstruction),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory PaymentSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PaymentSetting(
+      id: serializer.fromJson<String>(json['id']),
+      qrisEnabled: serializer.fromJson<bool>(json['qrisEnabled']),
+      qrisProvider: serializer.fromJson<String?>(json['qrisProvider']),
+      qrisMerchantId: serializer.fromJson<String?>(json['qrisMerchantId']),
+      qrisInstruction: serializer.fromJson<String?>(json['qrisInstruction']),
+      debitEnabled: serializer.fromJson<bool>(json['debitEnabled']),
+      debitProvider: serializer.fromJson<String?>(json['debitProvider']),
+      debitMerchantId: serializer.fromJson<String?>(json['debitMerchantId']),
+      debitInstruction: serializer.fromJson<String?>(json['debitInstruction']),
+      transferEnabled: serializer.fromJson<bool>(json['transferEnabled']),
+      transferBankName: serializer.fromJson<String?>(json['transferBankName']),
+      transferAccountNumber: serializer.fromJson<String?>(
+        json['transferAccountNumber'],
+      ),
+      transferAccountName: serializer.fromJson<String?>(
+        json['transferAccountName'],
+      ),
+      transferInstruction: serializer.fromJson<String?>(
+        json['transferInstruction'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'qrisEnabled': serializer.toJson<bool>(qrisEnabled),
+      'qrisProvider': serializer.toJson<String?>(qrisProvider),
+      'qrisMerchantId': serializer.toJson<String?>(qrisMerchantId),
+      'qrisInstruction': serializer.toJson<String?>(qrisInstruction),
+      'debitEnabled': serializer.toJson<bool>(debitEnabled),
+      'debitProvider': serializer.toJson<String?>(debitProvider),
+      'debitMerchantId': serializer.toJson<String?>(debitMerchantId),
+      'debitInstruction': serializer.toJson<String?>(debitInstruction),
+      'transferEnabled': serializer.toJson<bool>(transferEnabled),
+      'transferBankName': serializer.toJson<String?>(transferBankName),
+      'transferAccountNumber': serializer.toJson<String?>(
+        transferAccountNumber,
+      ),
+      'transferAccountName': serializer.toJson<String?>(transferAccountName),
+      'transferInstruction': serializer.toJson<String?>(transferInstruction),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  PaymentSetting copyWith({
+    String? id,
+    bool? qrisEnabled,
+    Value<String?> qrisProvider = const Value.absent(),
+    Value<String?> qrisMerchantId = const Value.absent(),
+    Value<String?> qrisInstruction = const Value.absent(),
+    bool? debitEnabled,
+    Value<String?> debitProvider = const Value.absent(),
+    Value<String?> debitMerchantId = const Value.absent(),
+    Value<String?> debitInstruction = const Value.absent(),
+    bool? transferEnabled,
+    Value<String?> transferBankName = const Value.absent(),
+    Value<String?> transferAccountNumber = const Value.absent(),
+    Value<String?> transferAccountName = const Value.absent(),
+    Value<String?> transferInstruction = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => PaymentSetting(
+    id: id ?? this.id,
+    qrisEnabled: qrisEnabled ?? this.qrisEnabled,
+    qrisProvider: qrisProvider.present ? qrisProvider.value : this.qrisProvider,
+    qrisMerchantId: qrisMerchantId.present
+        ? qrisMerchantId.value
+        : this.qrisMerchantId,
+    qrisInstruction: qrisInstruction.present
+        ? qrisInstruction.value
+        : this.qrisInstruction,
+    debitEnabled: debitEnabled ?? this.debitEnabled,
+    debitProvider: debitProvider.present
+        ? debitProvider.value
+        : this.debitProvider,
+    debitMerchantId: debitMerchantId.present
+        ? debitMerchantId.value
+        : this.debitMerchantId,
+    debitInstruction: debitInstruction.present
+        ? debitInstruction.value
+        : this.debitInstruction,
+    transferEnabled: transferEnabled ?? this.transferEnabled,
+    transferBankName: transferBankName.present
+        ? transferBankName.value
+        : this.transferBankName,
+    transferAccountNumber: transferAccountNumber.present
+        ? transferAccountNumber.value
+        : this.transferAccountNumber,
+    transferAccountName: transferAccountName.present
+        ? transferAccountName.value
+        : this.transferAccountName,
+    transferInstruction: transferInstruction.present
+        ? transferInstruction.value
+        : this.transferInstruction,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  PaymentSetting copyWithCompanion(PaymentSettingsCompanion data) {
+    return PaymentSetting(
+      id: data.id.present ? data.id.value : this.id,
+      qrisEnabled: data.qrisEnabled.present
+          ? data.qrisEnabled.value
+          : this.qrisEnabled,
+      qrisProvider: data.qrisProvider.present
+          ? data.qrisProvider.value
+          : this.qrisProvider,
+      qrisMerchantId: data.qrisMerchantId.present
+          ? data.qrisMerchantId.value
+          : this.qrisMerchantId,
+      qrisInstruction: data.qrisInstruction.present
+          ? data.qrisInstruction.value
+          : this.qrisInstruction,
+      debitEnabled: data.debitEnabled.present
+          ? data.debitEnabled.value
+          : this.debitEnabled,
+      debitProvider: data.debitProvider.present
+          ? data.debitProvider.value
+          : this.debitProvider,
+      debitMerchantId: data.debitMerchantId.present
+          ? data.debitMerchantId.value
+          : this.debitMerchantId,
+      debitInstruction: data.debitInstruction.present
+          ? data.debitInstruction.value
+          : this.debitInstruction,
+      transferEnabled: data.transferEnabled.present
+          ? data.transferEnabled.value
+          : this.transferEnabled,
+      transferBankName: data.transferBankName.present
+          ? data.transferBankName.value
+          : this.transferBankName,
+      transferAccountNumber: data.transferAccountNumber.present
+          ? data.transferAccountNumber.value
+          : this.transferAccountNumber,
+      transferAccountName: data.transferAccountName.present
+          ? data.transferAccountName.value
+          : this.transferAccountName,
+      transferInstruction: data.transferInstruction.present
+          ? data.transferInstruction.value
+          : this.transferInstruction,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentSetting(')
+          ..write('id: $id, ')
+          ..write('qrisEnabled: $qrisEnabled, ')
+          ..write('qrisProvider: $qrisProvider, ')
+          ..write('qrisMerchantId: $qrisMerchantId, ')
+          ..write('qrisInstruction: $qrisInstruction, ')
+          ..write('debitEnabled: $debitEnabled, ')
+          ..write('debitProvider: $debitProvider, ')
+          ..write('debitMerchantId: $debitMerchantId, ')
+          ..write('debitInstruction: $debitInstruction, ')
+          ..write('transferEnabled: $transferEnabled, ')
+          ..write('transferBankName: $transferBankName, ')
+          ..write('transferAccountNumber: $transferAccountNumber, ')
+          ..write('transferAccountName: $transferAccountName, ')
+          ..write('transferInstruction: $transferInstruction, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    qrisEnabled,
+    qrisProvider,
+    qrisMerchantId,
+    qrisInstruction,
+    debitEnabled,
+    debitProvider,
+    debitMerchantId,
+    debitInstruction,
+    transferEnabled,
+    transferBankName,
+    transferAccountNumber,
+    transferAccountName,
+    transferInstruction,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PaymentSetting &&
+          other.id == this.id &&
+          other.qrisEnabled == this.qrisEnabled &&
+          other.qrisProvider == this.qrisProvider &&
+          other.qrisMerchantId == this.qrisMerchantId &&
+          other.qrisInstruction == this.qrisInstruction &&
+          other.debitEnabled == this.debitEnabled &&
+          other.debitProvider == this.debitProvider &&
+          other.debitMerchantId == this.debitMerchantId &&
+          other.debitInstruction == this.debitInstruction &&
+          other.transferEnabled == this.transferEnabled &&
+          other.transferBankName == this.transferBankName &&
+          other.transferAccountNumber == this.transferAccountNumber &&
+          other.transferAccountName == this.transferAccountName &&
+          other.transferInstruction == this.transferInstruction &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
+  final Value<String> id;
+  final Value<bool> qrisEnabled;
+  final Value<String?> qrisProvider;
+  final Value<String?> qrisMerchantId;
+  final Value<String?> qrisInstruction;
+  final Value<bool> debitEnabled;
+  final Value<String?> debitProvider;
+  final Value<String?> debitMerchantId;
+  final Value<String?> debitInstruction;
+  final Value<bool> transferEnabled;
+  final Value<String?> transferBankName;
+  final Value<String?> transferAccountNumber;
+  final Value<String?> transferAccountName;
+  final Value<String?> transferInstruction;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const PaymentSettingsCompanion({
+    this.id = const Value.absent(),
+    this.qrisEnabled = const Value.absent(),
+    this.qrisProvider = const Value.absent(),
+    this.qrisMerchantId = const Value.absent(),
+    this.qrisInstruction = const Value.absent(),
+    this.debitEnabled = const Value.absent(),
+    this.debitProvider = const Value.absent(),
+    this.debitMerchantId = const Value.absent(),
+    this.debitInstruction = const Value.absent(),
+    this.transferEnabled = const Value.absent(),
+    this.transferBankName = const Value.absent(),
+    this.transferAccountNumber = const Value.absent(),
+    this.transferAccountName = const Value.absent(),
+    this.transferInstruction = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PaymentSettingsCompanion.insert({
+    required String id,
+    this.qrisEnabled = const Value.absent(),
+    this.qrisProvider = const Value.absent(),
+    this.qrisMerchantId = const Value.absent(),
+    this.qrisInstruction = const Value.absent(),
+    this.debitEnabled = const Value.absent(),
+    this.debitProvider = const Value.absent(),
+    this.debitMerchantId = const Value.absent(),
+    this.debitInstruction = const Value.absent(),
+    this.transferEnabled = const Value.absent(),
+    this.transferBankName = const Value.absent(),
+    this.transferAccountNumber = const Value.absent(),
+    this.transferAccountName = const Value.absent(),
+    this.transferInstruction = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<PaymentSetting> custom({
+    Expression<String>? id,
+    Expression<bool>? qrisEnabled,
+    Expression<String>? qrisProvider,
+    Expression<String>? qrisMerchantId,
+    Expression<String>? qrisInstruction,
+    Expression<bool>? debitEnabled,
+    Expression<String>? debitProvider,
+    Expression<String>? debitMerchantId,
+    Expression<String>? debitInstruction,
+    Expression<bool>? transferEnabled,
+    Expression<String>? transferBankName,
+    Expression<String>? transferAccountNumber,
+    Expression<String>? transferAccountName,
+    Expression<String>? transferInstruction,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (qrisEnabled != null) 'qris_enabled': qrisEnabled,
+      if (qrisProvider != null) 'qris_provider': qrisProvider,
+      if (qrisMerchantId != null) 'qris_merchant_id': qrisMerchantId,
+      if (qrisInstruction != null) 'qris_instruction': qrisInstruction,
+      if (debitEnabled != null) 'debit_enabled': debitEnabled,
+      if (debitProvider != null) 'debit_provider': debitProvider,
+      if (debitMerchantId != null) 'debit_merchant_id': debitMerchantId,
+      if (debitInstruction != null) 'debit_instruction': debitInstruction,
+      if (transferEnabled != null) 'transfer_enabled': transferEnabled,
+      if (transferBankName != null) 'transfer_bank_name': transferBankName,
+      if (transferAccountNumber != null)
+        'transfer_account_number': transferAccountNumber,
+      if (transferAccountName != null)
+        'transfer_account_name': transferAccountName,
+      if (transferInstruction != null)
+        'transfer_instruction': transferInstruction,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PaymentSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<bool>? qrisEnabled,
+    Value<String?>? qrisProvider,
+    Value<String?>? qrisMerchantId,
+    Value<String?>? qrisInstruction,
+    Value<bool>? debitEnabled,
+    Value<String?>? debitProvider,
+    Value<String?>? debitMerchantId,
+    Value<String?>? debitInstruction,
+    Value<bool>? transferEnabled,
+    Value<String?>? transferBankName,
+    Value<String?>? transferAccountNumber,
+    Value<String?>? transferAccountName,
+    Value<String?>? transferInstruction,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PaymentSettingsCompanion(
+      id: id ?? this.id,
+      qrisEnabled: qrisEnabled ?? this.qrisEnabled,
+      qrisProvider: qrisProvider ?? this.qrisProvider,
+      qrisMerchantId: qrisMerchantId ?? this.qrisMerchantId,
+      qrisInstruction: qrisInstruction ?? this.qrisInstruction,
+      debitEnabled: debitEnabled ?? this.debitEnabled,
+      debitProvider: debitProvider ?? this.debitProvider,
+      debitMerchantId: debitMerchantId ?? this.debitMerchantId,
+      debitInstruction: debitInstruction ?? this.debitInstruction,
+      transferEnabled: transferEnabled ?? this.transferEnabled,
+      transferBankName: transferBankName ?? this.transferBankName,
+      transferAccountNumber:
+          transferAccountNumber ?? this.transferAccountNumber,
+      transferAccountName: transferAccountName ?? this.transferAccountName,
+      transferInstruction: transferInstruction ?? this.transferInstruction,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (qrisEnabled.present) {
+      map['qris_enabled'] = Variable<bool>(qrisEnabled.value);
+    }
+    if (qrisProvider.present) {
+      map['qris_provider'] = Variable<String>(qrisProvider.value);
+    }
+    if (qrisMerchantId.present) {
+      map['qris_merchant_id'] = Variable<String>(qrisMerchantId.value);
+    }
+    if (qrisInstruction.present) {
+      map['qris_instruction'] = Variable<String>(qrisInstruction.value);
+    }
+    if (debitEnabled.present) {
+      map['debit_enabled'] = Variable<bool>(debitEnabled.value);
+    }
+    if (debitProvider.present) {
+      map['debit_provider'] = Variable<String>(debitProvider.value);
+    }
+    if (debitMerchantId.present) {
+      map['debit_merchant_id'] = Variable<String>(debitMerchantId.value);
+    }
+    if (debitInstruction.present) {
+      map['debit_instruction'] = Variable<String>(debitInstruction.value);
+    }
+    if (transferEnabled.present) {
+      map['transfer_enabled'] = Variable<bool>(transferEnabled.value);
+    }
+    if (transferBankName.present) {
+      map['transfer_bank_name'] = Variable<String>(transferBankName.value);
+    }
+    if (transferAccountNumber.present) {
+      map['transfer_account_number'] = Variable<String>(
+        transferAccountNumber.value,
+      );
+    }
+    if (transferAccountName.present) {
+      map['transfer_account_name'] = Variable<String>(
+        transferAccountName.value,
+      );
+    }
+    if (transferInstruction.present) {
+      map['transfer_instruction'] = Variable<String>(transferInstruction.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('qrisEnabled: $qrisEnabled, ')
+          ..write('qrisProvider: $qrisProvider, ')
+          ..write('qrisMerchantId: $qrisMerchantId, ')
+          ..write('qrisInstruction: $qrisInstruction, ')
+          ..write('debitEnabled: $debitEnabled, ')
+          ..write('debitProvider: $debitProvider, ')
+          ..write('debitMerchantId: $debitMerchantId, ')
+          ..write('debitInstruction: $debitInstruction, ')
+          ..write('transferEnabled: $transferEnabled, ')
+          ..write('transferBankName: $transferBankName, ')
+          ..write('transferAccountNumber: $transferAccountNumber, ')
+          ..write('transferAccountName: $transferAccountName, ')
+          ..write('transferInstruction: $transferInstruction, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7964,6 +9568,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $DeviceSettingsTable deviceSettings = $DeviceSettingsTable(this);
+  late final $CashierSettingsTable cashierSettings = $CashierSettingsTable(
+    this,
+  );
+  late final $PaymentSettingsTable paymentSettings = $PaymentSettingsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7982,6 +9592,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncQueue,
     appSettings,
     deviceSettings,
+    cashierSettings,
+    paymentSettings,
   ];
 }
 
@@ -14092,6 +15704,741 @@ typedef $$DeviceSettingsTableProcessedTableManager =
       DeviceSetting,
       PrefetchHooks Function()
     >;
+typedef $$CashierSettingsTableCreateCompanionBuilder =
+    CashierSettingsCompanion Function({
+      required String id,
+      Value<String> invoicePrefix,
+      Value<bool> resetInvoiceDaily,
+      Value<String> defaultPaymentMethod,
+      Value<String> defaultOrderType,
+      Value<bool> manualDiscountEnabled,
+      Value<bool> customerRequired,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CashierSettingsTableUpdateCompanionBuilder =
+    CashierSettingsCompanion Function({
+      Value<String> id,
+      Value<String> invoicePrefix,
+      Value<bool> resetInvoiceDaily,
+      Value<String> defaultPaymentMethod,
+      Value<String> defaultOrderType,
+      Value<bool> manualDiscountEnabled,
+      Value<bool> customerRequired,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$CashierSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $CashierSettingsTable> {
+  $$CashierSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get invoicePrefix => $composableBuilder(
+    column: $table.invoicePrefix,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get resetInvoiceDaily => $composableBuilder(
+    column: $table.resetInvoiceDaily,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultPaymentMethod => $composableBuilder(
+    column: $table.defaultPaymentMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultOrderType => $composableBuilder(
+    column: $table.defaultOrderType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get manualDiscountEnabled => $composableBuilder(
+    column: $table.manualDiscountEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get customerRequired => $composableBuilder(
+    column: $table.customerRequired,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CashierSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CashierSettingsTable> {
+  $$CashierSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get invoicePrefix => $composableBuilder(
+    column: $table.invoicePrefix,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get resetInvoiceDaily => $composableBuilder(
+    column: $table.resetInvoiceDaily,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultPaymentMethod => $composableBuilder(
+    column: $table.defaultPaymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultOrderType => $composableBuilder(
+    column: $table.defaultOrderType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get manualDiscountEnabled => $composableBuilder(
+    column: $table.manualDiscountEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get customerRequired => $composableBuilder(
+    column: $table.customerRequired,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CashierSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CashierSettingsTable> {
+  $$CashierSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get invoicePrefix => $composableBuilder(
+    column: $table.invoicePrefix,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get resetInvoiceDaily => $composableBuilder(
+    column: $table.resetInvoiceDaily,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultPaymentMethod => $composableBuilder(
+    column: $table.defaultPaymentMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultOrderType => $composableBuilder(
+    column: $table.defaultOrderType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get manualDiscountEnabled => $composableBuilder(
+    column: $table.manualDiscountEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get customerRequired => $composableBuilder(
+    column: $table.customerRequired,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CashierSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CashierSettingsTable,
+          CashierSetting,
+          $$CashierSettingsTableFilterComposer,
+          $$CashierSettingsTableOrderingComposer,
+          $$CashierSettingsTableAnnotationComposer,
+          $$CashierSettingsTableCreateCompanionBuilder,
+          $$CashierSettingsTableUpdateCompanionBuilder,
+          (
+            CashierSetting,
+            BaseReferences<
+              _$AppDatabase,
+              $CashierSettingsTable,
+              CashierSetting
+            >,
+          ),
+          CashierSetting,
+          PrefetchHooks Function()
+        > {
+  $$CashierSettingsTableTableManager(
+    _$AppDatabase db,
+    $CashierSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashierSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashierSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashierSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> invoicePrefix = const Value.absent(),
+                Value<bool> resetInvoiceDaily = const Value.absent(),
+                Value<String> defaultPaymentMethod = const Value.absent(),
+                Value<String> defaultOrderType = const Value.absent(),
+                Value<bool> manualDiscountEnabled = const Value.absent(),
+                Value<bool> customerRequired = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CashierSettingsCompanion(
+                id: id,
+                invoicePrefix: invoicePrefix,
+                resetInvoiceDaily: resetInvoiceDaily,
+                defaultPaymentMethod: defaultPaymentMethod,
+                defaultOrderType: defaultOrderType,
+                manualDiscountEnabled: manualDiscountEnabled,
+                customerRequired: customerRequired,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> invoicePrefix = const Value.absent(),
+                Value<bool> resetInvoiceDaily = const Value.absent(),
+                Value<String> defaultPaymentMethod = const Value.absent(),
+                Value<String> defaultOrderType = const Value.absent(),
+                Value<bool> manualDiscountEnabled = const Value.absent(),
+                Value<bool> customerRequired = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CashierSettingsCompanion.insert(
+                id: id,
+                invoicePrefix: invoicePrefix,
+                resetInvoiceDaily: resetInvoiceDaily,
+                defaultPaymentMethod: defaultPaymentMethod,
+                defaultOrderType: defaultOrderType,
+                manualDiscountEnabled: manualDiscountEnabled,
+                customerRequired: customerRequired,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CashierSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CashierSettingsTable,
+      CashierSetting,
+      $$CashierSettingsTableFilterComposer,
+      $$CashierSettingsTableOrderingComposer,
+      $$CashierSettingsTableAnnotationComposer,
+      $$CashierSettingsTableCreateCompanionBuilder,
+      $$CashierSettingsTableUpdateCompanionBuilder,
+      (
+        CashierSetting,
+        BaseReferences<_$AppDatabase, $CashierSettingsTable, CashierSetting>,
+      ),
+      CashierSetting,
+      PrefetchHooks Function()
+    >;
+typedef $$PaymentSettingsTableCreateCompanionBuilder =
+    PaymentSettingsCompanion Function({
+      required String id,
+      Value<bool> qrisEnabled,
+      Value<String?> qrisProvider,
+      Value<String?> qrisMerchantId,
+      Value<String?> qrisInstruction,
+      Value<bool> debitEnabled,
+      Value<String?> debitProvider,
+      Value<String?> debitMerchantId,
+      Value<String?> debitInstruction,
+      Value<bool> transferEnabled,
+      Value<String?> transferBankName,
+      Value<String?> transferAccountNumber,
+      Value<String?> transferAccountName,
+      Value<String?> transferInstruction,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PaymentSettingsTableUpdateCompanionBuilder =
+    PaymentSettingsCompanion Function({
+      Value<String> id,
+      Value<bool> qrisEnabled,
+      Value<String?> qrisProvider,
+      Value<String?> qrisMerchantId,
+      Value<String?> qrisInstruction,
+      Value<bool> debitEnabled,
+      Value<String?> debitProvider,
+      Value<String?> debitMerchantId,
+      Value<String?> debitInstruction,
+      Value<bool> transferEnabled,
+      Value<String?> transferBankName,
+      Value<String?> transferAccountNumber,
+      Value<String?> transferAccountName,
+      Value<String?> transferInstruction,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PaymentSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $PaymentSettingsTable> {
+  $$PaymentSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get qrisEnabled => $composableBuilder(
+    column: $table.qrisEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get qrisProvider => $composableBuilder(
+    column: $table.qrisProvider,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get qrisMerchantId => $composableBuilder(
+    column: $table.qrisMerchantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get qrisInstruction => $composableBuilder(
+    column: $table.qrisInstruction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get debitEnabled => $composableBuilder(
+    column: $table.debitEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get debitProvider => $composableBuilder(
+    column: $table.debitProvider,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get debitMerchantId => $composableBuilder(
+    column: $table.debitMerchantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get debitInstruction => $composableBuilder(
+    column: $table.debitInstruction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get transferEnabled => $composableBuilder(
+    column: $table.transferEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transferBankName => $composableBuilder(
+    column: $table.transferBankName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transferAccountNumber => $composableBuilder(
+    column: $table.transferAccountNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transferAccountName => $composableBuilder(
+    column: $table.transferAccountName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transferInstruction => $composableBuilder(
+    column: $table.transferInstruction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PaymentSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PaymentSettingsTable> {
+  $$PaymentSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get qrisEnabled => $composableBuilder(
+    column: $table.qrisEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get qrisProvider => $composableBuilder(
+    column: $table.qrisProvider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get qrisMerchantId => $composableBuilder(
+    column: $table.qrisMerchantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get qrisInstruction => $composableBuilder(
+    column: $table.qrisInstruction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get debitEnabled => $composableBuilder(
+    column: $table.debitEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get debitProvider => $composableBuilder(
+    column: $table.debitProvider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get debitMerchantId => $composableBuilder(
+    column: $table.debitMerchantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get debitInstruction => $composableBuilder(
+    column: $table.debitInstruction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get transferEnabled => $composableBuilder(
+    column: $table.transferEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transferBankName => $composableBuilder(
+    column: $table.transferBankName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transferAccountNumber => $composableBuilder(
+    column: $table.transferAccountNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transferAccountName => $composableBuilder(
+    column: $table.transferAccountName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transferInstruction => $composableBuilder(
+    column: $table.transferInstruction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PaymentSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PaymentSettingsTable> {
+  $$PaymentSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get qrisEnabled => $composableBuilder(
+    column: $table.qrisEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get qrisProvider => $composableBuilder(
+    column: $table.qrisProvider,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get qrisMerchantId => $composableBuilder(
+    column: $table.qrisMerchantId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get qrisInstruction => $composableBuilder(
+    column: $table.qrisInstruction,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get debitEnabled => $composableBuilder(
+    column: $table.debitEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get debitProvider => $composableBuilder(
+    column: $table.debitProvider,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get debitMerchantId => $composableBuilder(
+    column: $table.debitMerchantId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get debitInstruction => $composableBuilder(
+    column: $table.debitInstruction,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get transferEnabled => $composableBuilder(
+    column: $table.transferEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transferBankName => $composableBuilder(
+    column: $table.transferBankName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transferAccountNumber => $composableBuilder(
+    column: $table.transferAccountNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transferAccountName => $composableBuilder(
+    column: $table.transferAccountName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transferInstruction => $composableBuilder(
+    column: $table.transferInstruction,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PaymentSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PaymentSettingsTable,
+          PaymentSetting,
+          $$PaymentSettingsTableFilterComposer,
+          $$PaymentSettingsTableOrderingComposer,
+          $$PaymentSettingsTableAnnotationComposer,
+          $$PaymentSettingsTableCreateCompanionBuilder,
+          $$PaymentSettingsTableUpdateCompanionBuilder,
+          (
+            PaymentSetting,
+            BaseReferences<
+              _$AppDatabase,
+              $PaymentSettingsTable,
+              PaymentSetting
+            >,
+          ),
+          PaymentSetting,
+          PrefetchHooks Function()
+        > {
+  $$PaymentSettingsTableTableManager(
+    _$AppDatabase db,
+    $PaymentSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PaymentSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PaymentSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PaymentSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<bool> qrisEnabled = const Value.absent(),
+                Value<String?> qrisProvider = const Value.absent(),
+                Value<String?> qrisMerchantId = const Value.absent(),
+                Value<String?> qrisInstruction = const Value.absent(),
+                Value<bool> debitEnabled = const Value.absent(),
+                Value<String?> debitProvider = const Value.absent(),
+                Value<String?> debitMerchantId = const Value.absent(),
+                Value<String?> debitInstruction = const Value.absent(),
+                Value<bool> transferEnabled = const Value.absent(),
+                Value<String?> transferBankName = const Value.absent(),
+                Value<String?> transferAccountNumber = const Value.absent(),
+                Value<String?> transferAccountName = const Value.absent(),
+                Value<String?> transferInstruction = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaymentSettingsCompanion(
+                id: id,
+                qrisEnabled: qrisEnabled,
+                qrisProvider: qrisProvider,
+                qrisMerchantId: qrisMerchantId,
+                qrisInstruction: qrisInstruction,
+                debitEnabled: debitEnabled,
+                debitProvider: debitProvider,
+                debitMerchantId: debitMerchantId,
+                debitInstruction: debitInstruction,
+                transferEnabled: transferEnabled,
+                transferBankName: transferBankName,
+                transferAccountNumber: transferAccountNumber,
+                transferAccountName: transferAccountName,
+                transferInstruction: transferInstruction,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<bool> qrisEnabled = const Value.absent(),
+                Value<String?> qrisProvider = const Value.absent(),
+                Value<String?> qrisMerchantId = const Value.absent(),
+                Value<String?> qrisInstruction = const Value.absent(),
+                Value<bool> debitEnabled = const Value.absent(),
+                Value<String?> debitProvider = const Value.absent(),
+                Value<String?> debitMerchantId = const Value.absent(),
+                Value<String?> debitInstruction = const Value.absent(),
+                Value<bool> transferEnabled = const Value.absent(),
+                Value<String?> transferBankName = const Value.absent(),
+                Value<String?> transferAccountNumber = const Value.absent(),
+                Value<String?> transferAccountName = const Value.absent(),
+                Value<String?> transferInstruction = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaymentSettingsCompanion.insert(
+                id: id,
+                qrisEnabled: qrisEnabled,
+                qrisProvider: qrisProvider,
+                qrisMerchantId: qrisMerchantId,
+                qrisInstruction: qrisInstruction,
+                debitEnabled: debitEnabled,
+                debitProvider: debitProvider,
+                debitMerchantId: debitMerchantId,
+                debitInstruction: debitInstruction,
+                transferEnabled: transferEnabled,
+                transferBankName: transferBankName,
+                transferAccountNumber: transferAccountNumber,
+                transferAccountName: transferAccountName,
+                transferInstruction: transferInstruction,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PaymentSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PaymentSettingsTable,
+      PaymentSetting,
+      $$PaymentSettingsTableFilterComposer,
+      $$PaymentSettingsTableOrderingComposer,
+      $$PaymentSettingsTableAnnotationComposer,
+      $$PaymentSettingsTableCreateCompanionBuilder,
+      $$PaymentSettingsTableUpdateCompanionBuilder,
+      (
+        PaymentSetting,
+        BaseReferences<_$AppDatabase, $PaymentSettingsTable, PaymentSetting>,
+      ),
+      PaymentSetting,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14122,4 +16469,8 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$DeviceSettingsTableTableManager get deviceSettings =>
       $$DeviceSettingsTableTableManager(_db, _db.deviceSettings);
+  $$CashierSettingsTableTableManager get cashierSettings =>
+      $$CashierSettingsTableTableManager(_db, _db.cashierSettings);
+  $$PaymentSettingsTableTableManager get paymentSettings =>
+      $$PaymentSettingsTableTableManager(_db, _db.paymentSettings);
 }

@@ -107,6 +107,8 @@ class OrderRepository {
     required String cashSessionId,
     String orderType = 'takeaway',
     String paymentMethod = 'cash',
+    String invoicePrefix = 'INV',
+    bool resetInvoiceDaily = true,
     required int subtotal,
     required int discountTotal,
     int taxTotal = 0,
@@ -118,10 +120,14 @@ class OrderRepository {
 
     final now = DateTime.now();
     final orderId = _uuid.v4();
-    final orderNumber = _buildOrderNumber(now);
     final paymentId = _uuid.v4();
 
     return _database.transaction(() async {
+      final orderNumber = await _buildOrderNumber(
+        now,
+        prefix: invoicePrefix,
+        resetDaily: resetInvoiceDaily,
+      );
       await _decreaseTrackedStock(items, now);
 
       await _database
@@ -295,16 +301,39 @@ class OrderRepository {
     }
   }
 
-  String _buildOrderNumber(DateTime value) {
-    final stamp =
+  Future<String> _buildOrderNumber(
+    DateTime value, {
+    required String prefix,
+    required bool resetDaily,
+  }) async {
+    final safePrefix = prefix.trim().toUpperCase().isEmpty
+        ? 'INV'
+        : prefix.trim().toUpperCase();
+    final dayStamp =
         '${value.year}'
         '${value.month.toString().padLeft(2, '0')}'
-        '${value.day.toString().padLeft(2, '0')}'
-        '-'
-        '${value.hour.toString().padLeft(2, '0')}'
-        '${value.minute.toString().padLeft(2, '0')}'
-        '${value.second.toString().padLeft(2, '0')}';
-    return 'INV-$stamp';
+        '${value.day.toString().padLeft(2, '0')}';
+    final countQuery = _database.selectOnly(_database.orders)
+      ..addColumns([_database.orders.id.count()]);
+
+    if (resetDaily) {
+      final start = DateTime(value.year, value.month, value.day);
+      final end = start.add(const Duration(days: 1));
+      countQuery.where(
+        _database.orders.orderedAt.isBiggerOrEqualValue(start) &
+            _database.orders.orderedAt.isSmallerThanValue(end) &
+            _database.orders.orderNumber.like('$safePrefix-$dayStamp-%'),
+      );
+    } else {
+      countQuery.where(_database.orders.orderNumber.like('$safePrefix-%'));
+    }
+
+    final count = await countQuery
+        .map((row) => row.read(_database.orders.id.count()) ?? 0)
+        .getSingle();
+    final sequence = (count + 1).toString().padLeft(4, '0');
+    if (resetDaily) return '$safePrefix-$dayStamp-$sequence';
+    return '$safePrefix-$sequence';
   }
 }
 

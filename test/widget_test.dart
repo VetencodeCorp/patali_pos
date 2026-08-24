@@ -10,6 +10,8 @@ import 'package:patali_pos/data/database/database_provider.dart';
 import 'package:patali_pos/data/repositories/app_settings_repository.dart';
 import 'package:patali_pos/data/repositories/category_repository.dart';
 import 'package:patali_pos/data/repositories/cash_session_repository.dart';
+import 'package:patali_pos/data/repositories/cashier_settings_repository.dart';
+import 'package:patali_pos/data/repositories/payment_settings_repository.dart';
 import 'package:patali_pos/data/repositories/product_repository.dart';
 
 void main() {
@@ -75,6 +77,31 @@ void main() {
                 serviceEnabled: false,
                 serviceRate: 0,
                 showOutletAddress: true,
+                createdAt: now,
+              ),
+            ),
+          ),
+          cashierSettingsProvider.overrideWith(
+            (ref) => Stream.value(
+              CashierSetting(
+                id: defaultCashierSettingsId,
+                invoicePrefix: 'INV',
+                resetInvoiceDaily: true,
+                defaultPaymentMethod: 'cash',
+                defaultOrderType: 'Bungkus',
+                manualDiscountEnabled: true,
+                customerRequired: false,
+                createdAt: now,
+              ),
+            ),
+          ),
+          paymentSettingsProvider.overrideWith(
+            (ref) => Stream.value(
+              PaymentSetting(
+                id: defaultPaymentSettingsId,
+                qrisEnabled: true,
+                debitEnabled: true,
+                transferEnabled: true,
                 createdAt: now,
               ),
             ),

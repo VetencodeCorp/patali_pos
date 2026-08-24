@@ -10,7 +10,9 @@ import 'package:intl/intl.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/repositories/app_settings_repository.dart';
 import '../../../data/repositories/cash_session_repository.dart';
+import '../../../data/repositories/cashier_settings_repository.dart';
 import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/payment_settings_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../shared/widgets/patali_shell.dart';
 import '../../orders/presentation/order_history_screen.dart';
@@ -38,6 +40,25 @@ class PosScreen extends ConsumerWidget {
     final categories = ref.watch(activeCategoriesProvider);
     final cashSession = ref.watch(activeCashSessionProvider);
     final cartItems = ref.watch(cartControllerProvider);
+    ref.listen(cashierSettingsProvider, (previous, next) {
+      next.whenData((settings) {
+        final hasCart = ref.read(cartControllerProvider).isNotEmpty;
+        if (hasCart) return;
+        ref.read(selectedPaymentMethodProvider.notifier).state =
+            settings.defaultPaymentMethod;
+        ref.read(selectedOrderTypeProvider.notifier).state =
+            settings.defaultOrderType;
+      });
+    });
+    ref.listen(paymentSettingsProvider, (previous, next) {
+      next.whenData((settings) {
+        final active = activePaymentMethods(settings);
+        final selected = ref.read(selectedPaymentMethodProvider);
+        if (!active.contains(selected)) {
+          ref.read(selectedPaymentMethodProvider.notifier).state = 'cash';
+        }
+      });
+    });
 
     return PataliShell(
       title: 'Patali POS',
@@ -813,6 +834,9 @@ class _CartPanel extends ConsumerWidget {
     final checkoutState = ref.watch(checkoutControllerProvider);
     final cashSession = ref.watch(activeCashSessionProvider).valueOrNull;
     final settings = ref.watch(appSettingsProvider).valueOrNull;
+    final cashierSettings = ref.watch(cashierSettingsProvider).valueOrNull;
+    final manualDiscountEnabled =
+        cashierSettings?.manualDiscountEnabled ?? true;
     final currency = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -895,7 +919,9 @@ class _CartPanel extends ConsumerWidget {
                     ref.read(cartControllerProvider.notifier).clear();
                     ref.read(cartDiscountProvider.notifier).state = 0;
                     ref.read(selectedPaymentMethodProvider.notifier).state =
-                        'cash';
+                        cashierSettings?.defaultPaymentMethod ?? 'cash';
+                    ref.read(selectedOrderTypeProvider.notifier).state =
+                        cashierSettings?.defaultOrderType ?? 'Bungkus';
                   },
                   icon: const Icon(Icons.delete_sweep_outlined),
                 ),
@@ -927,7 +953,7 @@ class _CartPanel extends ConsumerWidget {
           const SizedBox(height: 8),
           InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: cartItems.isEmpty
+            onTap: cartItems.isEmpty || !manualDiscountEnabled
                 ? null
                 : () => _showDiscountDialog(
                     context: context,
@@ -940,10 +966,16 @@ class _CartPanel extends ConsumerWidget {
               child: _CartAmountRow(
                 label: 'Diskon',
                 value: safeDiscount == 0
-                    ? 'Tambah'
+                    ? manualDiscountEnabled
+                          ? 'Tambah'
+                          : 'Nonaktif'
                     : '-${currency.format(safeDiscount)}',
-                valueColor: safeDiscount == 0 ? _brand : _ink,
-                trailingIcon: Icons.edit_outlined,
+                valueColor: safeDiscount == 0 && manualDiscountEnabled
+                    ? _brand
+                    : _ink,
+                trailingIcon: manualDiscountEnabled
+                    ? Icons.edit_outlined
+                    : null,
               ),
             ),
           ),
@@ -1094,23 +1126,26 @@ class _PaymentMethodSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(selectedPaymentMethodProvider);
+    final paymentSettings = ref.watch(paymentSettingsProvider).valueOrNull;
+    final activeMethods = activePaymentMethods(paymentSettings);
 
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         for (final (method, label, icon) in _paymentMethods)
-          ChoiceChip(
-            avatar: Icon(icon, size: 17),
-            label: Text(label),
-            selected: selected == method,
-            onSelected: enabled
-                ? (_) {
-                    ref.read(selectedPaymentMethodProvider.notifier).state =
-                        method;
-                  }
-                : null,
-          ),
+          if (activeMethods.contains(method))
+            ChoiceChip(
+              avatar: Icon(icon, size: 17),
+              label: Text(label),
+              selected: selected == method,
+              onSelected: enabled
+                  ? (_) {
+                      ref.read(selectedPaymentMethodProvider.notifier).state =
+                          method;
+                    }
+                  : null,
+            ),
       ],
     );
   }

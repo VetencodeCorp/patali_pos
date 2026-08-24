@@ -224,6 +224,49 @@ class DeviceSettings extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class CashierSettings extends Table {
+  TextColumn get id => text()();
+  TextColumn get invoicePrefix => text().withDefault(const Constant('INV'))();
+  BoolColumn get resetInvoiceDaily =>
+      boolean().withDefault(const Constant(true))();
+  TextColumn get defaultPaymentMethod =>
+      text().withDefault(const Constant('cash'))();
+  TextColumn get defaultOrderType =>
+      text().withDefault(const Constant('Bungkus'))();
+  BoolColumn get manualDiscountEnabled =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get customerRequired =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class PaymentSettings extends Table {
+  TextColumn get id => text()();
+  BoolColumn get qrisEnabled => boolean().withDefault(const Constant(true))();
+  TextColumn get qrisProvider => text().nullable()();
+  TextColumn get qrisMerchantId => text().nullable()();
+  TextColumn get qrisInstruction => text().nullable()();
+  BoolColumn get debitEnabled => boolean().withDefault(const Constant(true))();
+  TextColumn get debitProvider => text().nullable()();
+  TextColumn get debitMerchantId => text().nullable()();
+  TextColumn get debitInstruction => text().nullable()();
+  BoolColumn get transferEnabled =>
+      boolean().withDefault(const Constant(true))();
+  TextColumn get transferBankName => text().nullable()();
+  TextColumn get transferAccountNumber => text().nullable()();
+  TextColumn get transferAccountName => text().nullable()();
+  TextColumn get transferInstruction => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Categories,
@@ -239,6 +282,8 @@ class DeviceSettings extends Table {
     SyncQueue,
     AppSettings,
     DeviceSettings,
+    CashierSettings,
+    PaymentSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -247,7 +292,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -260,6 +305,12 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await migrator.createTable(deviceSettings);
+      }
+      if (from < 5) {
+        await migrator.createTable(cashierSettings);
+      }
+      if (from < 6) {
+        await migrator.createTable(paymentSettings);
       }
     },
   );

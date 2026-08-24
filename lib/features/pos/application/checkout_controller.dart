@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/repositories/app_settings_repository.dart';
 import '../../../data/repositories/cash_session_repository.dart';
+import '../../../data/repositories/cashier_settings_repository.dart';
 import '../../../data/repositories/order_repository.dart';
+import '../../../data/repositories/payment_settings_repository.dart';
 import 'cart_controller.dart';
 
 final checkoutControllerProvider =
@@ -20,6 +22,16 @@ class CheckoutController extends AsyncNotifier<void> {
     final settings = await ref
         .read(appSettingsRepositoryProvider)
         .getSettings();
+    final cashierSettings = await ref
+        .read(cashierSettingsRepositoryProvider)
+        .getSettings();
+    final paymentSettings = await ref
+        .read(paymentSettingsRepositoryProvider)
+        .getSettings();
+    final safePaymentMethod =
+        activePaymentMethods(paymentSettings).contains(paymentMethod)
+        ? paymentMethod
+        : 'cash';
     final taxableAmount = subtotal - discountTotal;
     final taxTotal = settings.taxEnabled
         ? (taxableAmount * settings.taxRate / 100).round()
@@ -49,7 +61,9 @@ class CheckoutController extends AsyncNotifier<void> {
           ],
           cashSessionId: cashSession.id,
           orderType: orderType,
-          paymentMethod: paymentMethod,
+          paymentMethod: safePaymentMethod,
+          invoicePrefix: cashierSettings.invoicePrefix,
+          resetInvoiceDaily: cashierSettings.resetInvoiceDaily,
           subtotal: subtotal,
           discountTotal: discountTotal,
           taxTotal: taxTotal + serviceTotal,
@@ -58,8 +72,10 @@ class CheckoutController extends AsyncNotifier<void> {
 
     ref.read(cartControllerProvider.notifier).clear();
     ref.read(cartDiscountProvider.notifier).state = 0;
-    ref.read(selectedPaymentMethodProvider.notifier).state = 'cash';
-    ref.read(selectedOrderTypeProvider.notifier).state = 'Bungkus';
+    ref.read(selectedPaymentMethodProvider.notifier).state =
+        cashierSettings.defaultPaymentMethod;
+    ref.read(selectedOrderTypeProvider.notifier).state =
+        cashierSettings.defaultOrderType;
     return order;
   }
 }

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/patali_card.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import 'cashier_settings_screen.dart';
 import 'device_settings_screen.dart';
+import 'payment_settings_screen.dart';
 import 'product_management_screen.dart';
 import 'receipt_tax_settings_screen.dart';
 
@@ -40,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.point_of_sale_outlined,
             title: 'Kasir',
             subtitle: 'Nomor order, metode bayar, kas harian',
-            onTap: () {},
+            onTap: () => context.push(CashierSettingsScreen.routePath),
           ),
           _SettingEntry(
             icon: Icons.print_outlined,
@@ -52,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.credit_card,
             title: 'Pembayaran Nontunai',
             subtitle: 'QRIS, transfer, EDC, integrasi payment gateway',
-            onTap: () {},
+            onTap: () => context.push(PaymentSettingsScreen.routePath),
           ),
           _SettingEntry(
             icon: Icons.local_offer_outlined,
