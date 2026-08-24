@@ -28,6 +28,7 @@ void main() {
       qrisEnabled: true,
       qrisProvider: 'Midtrans',
       qrisMerchantId: 'MID-001',
+      qrisImagePath: r'D:\qris\patali.png',
       qrisInstruction: 'Scan QRIS',
       debitEnabled: false,
       debitProvider: '',
@@ -43,6 +44,7 @@ void main() {
     final saved = await settings.getSettings();
 
     expect(saved.qrisProvider, 'Midtrans');
+    expect(saved.qrisImagePath, r'D:\qris\patali.png');
     expect(saved.debitEnabled, isFalse);
     expect(saved.transferBankName, 'BCA');
     expect(activePaymentMethods(saved), ['cash', 'qris', 'transfer']);

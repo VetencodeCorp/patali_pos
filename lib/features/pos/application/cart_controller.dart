@@ -12,6 +12,8 @@ final selectedPaymentMethodProvider = StateProvider<String>((ref) => 'cash');
 
 final selectedOrderTypeProvider = StateProvider<String>((ref) => 'Bungkus');
 
+final selectedCustomerIdProvider = StateProvider<String?>((ref) => null);
+
 class CartController extends Notifier<List<CartItem>> {
   @override
   List<CartItem> build() => const [];

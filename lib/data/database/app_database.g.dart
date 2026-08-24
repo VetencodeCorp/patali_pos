@@ -8595,6 +8595,17 @@ class $PaymentSettingsTable extends PaymentSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _qrisImagePathMeta = const VerificationMeta(
+    'qrisImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> qrisImagePath = GeneratedColumn<String>(
+    'qris_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _qrisInstructionMeta = const VerificationMeta(
     'qrisInstruction',
   );
@@ -8742,6 +8753,7 @@ class $PaymentSettingsTable extends PaymentSettings
     qrisEnabled,
     qrisProvider,
     qrisMerchantId,
+    qrisImagePath,
     qrisInstruction,
     debitEnabled,
     debitProvider,
@@ -8796,6 +8808,15 @@ class $PaymentSettingsTable extends PaymentSettings
         qrisMerchantId.isAcceptableOrUnknown(
           data['qris_merchant_id']!,
           _qrisMerchantIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('qris_image_path')) {
+      context.handle(
+        _qrisImagePathMeta,
+        qrisImagePath.isAcceptableOrUnknown(
+          data['qris_image_path']!,
+          _qrisImagePathMeta,
         ),
       );
     }
@@ -8926,6 +8947,10 @@ class $PaymentSettingsTable extends PaymentSettings
         DriftSqlType.string,
         data['${effectivePrefix}qris_merchant_id'],
       ),
+      qrisImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}qris_image_path'],
+      ),
       qrisInstruction: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}qris_instruction'],
@@ -8988,6 +9013,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
   final bool qrisEnabled;
   final String? qrisProvider;
   final String? qrisMerchantId;
+  final String? qrisImagePath;
   final String? qrisInstruction;
   final bool debitEnabled;
   final String? debitProvider;
@@ -9005,6 +9031,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
     required this.qrisEnabled,
     this.qrisProvider,
     this.qrisMerchantId,
+    this.qrisImagePath,
     this.qrisInstruction,
     required this.debitEnabled,
     this.debitProvider,
@@ -9028,6 +9055,9 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
     }
     if (!nullToAbsent || qrisMerchantId != null) {
       map['qris_merchant_id'] = Variable<String>(qrisMerchantId);
+    }
+    if (!nullToAbsent || qrisImagePath != null) {
+      map['qris_image_path'] = Variable<String>(qrisImagePath);
     }
     if (!nullToAbsent || qrisInstruction != null) {
       map['qris_instruction'] = Variable<String>(qrisInstruction);
@@ -9072,6 +9102,9 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
       qrisMerchantId: qrisMerchantId == null && nullToAbsent
           ? const Value.absent()
           : Value(qrisMerchantId),
+      qrisImagePath: qrisImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(qrisImagePath),
       qrisInstruction: qrisInstruction == null && nullToAbsent
           ? const Value.absent()
           : Value(qrisInstruction),
@@ -9115,6 +9148,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
       qrisEnabled: serializer.fromJson<bool>(json['qrisEnabled']),
       qrisProvider: serializer.fromJson<String?>(json['qrisProvider']),
       qrisMerchantId: serializer.fromJson<String?>(json['qrisMerchantId']),
+      qrisImagePath: serializer.fromJson<String?>(json['qrisImagePath']),
       qrisInstruction: serializer.fromJson<String?>(json['qrisInstruction']),
       debitEnabled: serializer.fromJson<bool>(json['debitEnabled']),
       debitProvider: serializer.fromJson<String?>(json['debitProvider']),
@@ -9143,6 +9177,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
       'qrisEnabled': serializer.toJson<bool>(qrisEnabled),
       'qrisProvider': serializer.toJson<String?>(qrisProvider),
       'qrisMerchantId': serializer.toJson<String?>(qrisMerchantId),
+      'qrisImagePath': serializer.toJson<String?>(qrisImagePath),
       'qrisInstruction': serializer.toJson<String?>(qrisInstruction),
       'debitEnabled': serializer.toJson<bool>(debitEnabled),
       'debitProvider': serializer.toJson<String?>(debitProvider),
@@ -9165,6 +9200,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
     bool? qrisEnabled,
     Value<String?> qrisProvider = const Value.absent(),
     Value<String?> qrisMerchantId = const Value.absent(),
+    Value<String?> qrisImagePath = const Value.absent(),
     Value<String?> qrisInstruction = const Value.absent(),
     bool? debitEnabled,
     Value<String?> debitProvider = const Value.absent(),
@@ -9184,6 +9220,9 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
     qrisMerchantId: qrisMerchantId.present
         ? qrisMerchantId.value
         : this.qrisMerchantId,
+    qrisImagePath: qrisImagePath.present
+        ? qrisImagePath.value
+        : this.qrisImagePath,
     qrisInstruction: qrisInstruction.present
         ? qrisInstruction.value
         : this.qrisInstruction,
@@ -9225,6 +9264,9 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
       qrisMerchantId: data.qrisMerchantId.present
           ? data.qrisMerchantId.value
           : this.qrisMerchantId,
+      qrisImagePath: data.qrisImagePath.present
+          ? data.qrisImagePath.value
+          : this.qrisImagePath,
       qrisInstruction: data.qrisInstruction.present
           ? data.qrisInstruction.value
           : this.qrisInstruction,
@@ -9267,6 +9309,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
           ..write('qrisEnabled: $qrisEnabled, ')
           ..write('qrisProvider: $qrisProvider, ')
           ..write('qrisMerchantId: $qrisMerchantId, ')
+          ..write('qrisImagePath: $qrisImagePath, ')
           ..write('qrisInstruction: $qrisInstruction, ')
           ..write('debitEnabled: $debitEnabled, ')
           ..write('debitProvider: $debitProvider, ')
@@ -9289,6 +9332,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
     qrisEnabled,
     qrisProvider,
     qrisMerchantId,
+    qrisImagePath,
     qrisInstruction,
     debitEnabled,
     debitProvider,
@@ -9310,6 +9354,7 @@ class PaymentSetting extends DataClass implements Insertable<PaymentSetting> {
           other.qrisEnabled == this.qrisEnabled &&
           other.qrisProvider == this.qrisProvider &&
           other.qrisMerchantId == this.qrisMerchantId &&
+          other.qrisImagePath == this.qrisImagePath &&
           other.qrisInstruction == this.qrisInstruction &&
           other.debitEnabled == this.debitEnabled &&
           other.debitProvider == this.debitProvider &&
@@ -9329,6 +9374,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
   final Value<bool> qrisEnabled;
   final Value<String?> qrisProvider;
   final Value<String?> qrisMerchantId;
+  final Value<String?> qrisImagePath;
   final Value<String?> qrisInstruction;
   final Value<bool> debitEnabled;
   final Value<String?> debitProvider;
@@ -9347,6 +9393,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
     this.qrisEnabled = const Value.absent(),
     this.qrisProvider = const Value.absent(),
     this.qrisMerchantId = const Value.absent(),
+    this.qrisImagePath = const Value.absent(),
     this.qrisInstruction = const Value.absent(),
     this.debitEnabled = const Value.absent(),
     this.debitProvider = const Value.absent(),
@@ -9366,6 +9413,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
     this.qrisEnabled = const Value.absent(),
     this.qrisProvider = const Value.absent(),
     this.qrisMerchantId = const Value.absent(),
+    this.qrisImagePath = const Value.absent(),
     this.qrisInstruction = const Value.absent(),
     this.debitEnabled = const Value.absent(),
     this.debitProvider = const Value.absent(),
@@ -9385,6 +9433,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
     Expression<bool>? qrisEnabled,
     Expression<String>? qrisProvider,
     Expression<String>? qrisMerchantId,
+    Expression<String>? qrisImagePath,
     Expression<String>? qrisInstruction,
     Expression<bool>? debitEnabled,
     Expression<String>? debitProvider,
@@ -9404,6 +9453,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
       if (qrisEnabled != null) 'qris_enabled': qrisEnabled,
       if (qrisProvider != null) 'qris_provider': qrisProvider,
       if (qrisMerchantId != null) 'qris_merchant_id': qrisMerchantId,
+      if (qrisImagePath != null) 'qris_image_path': qrisImagePath,
       if (qrisInstruction != null) 'qris_instruction': qrisInstruction,
       if (debitEnabled != null) 'debit_enabled': debitEnabled,
       if (debitProvider != null) 'debit_provider': debitProvider,
@@ -9428,6 +9478,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
     Value<bool>? qrisEnabled,
     Value<String?>? qrisProvider,
     Value<String?>? qrisMerchantId,
+    Value<String?>? qrisImagePath,
     Value<String?>? qrisInstruction,
     Value<bool>? debitEnabled,
     Value<String?>? debitProvider,
@@ -9447,6 +9498,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
       qrisEnabled: qrisEnabled ?? this.qrisEnabled,
       qrisProvider: qrisProvider ?? this.qrisProvider,
       qrisMerchantId: qrisMerchantId ?? this.qrisMerchantId,
+      qrisImagePath: qrisImagePath ?? this.qrisImagePath,
       qrisInstruction: qrisInstruction ?? this.qrisInstruction,
       debitEnabled: debitEnabled ?? this.debitEnabled,
       debitProvider: debitProvider ?? this.debitProvider,
@@ -9478,6 +9530,9 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
     }
     if (qrisMerchantId.present) {
       map['qris_merchant_id'] = Variable<String>(qrisMerchantId.value);
+    }
+    if (qrisImagePath.present) {
+      map['qris_image_path'] = Variable<String>(qrisImagePath.value);
     }
     if (qrisInstruction.present) {
       map['qris_instruction'] = Variable<String>(qrisInstruction.value);
@@ -9532,6 +9587,7 @@ class PaymentSettingsCompanion extends UpdateCompanion<PaymentSetting> {
           ..write('qrisEnabled: $qrisEnabled, ')
           ..write('qrisProvider: $qrisProvider, ')
           ..write('qrisMerchantId: $qrisMerchantId, ')
+          ..write('qrisImagePath: $qrisImagePath, ')
           ..write('qrisInstruction: $qrisInstruction, ')
           ..write('debitEnabled: $debitEnabled, ')
           ..write('debitProvider: $debitProvider, ')
@@ -16004,6 +16060,7 @@ typedef $$PaymentSettingsTableCreateCompanionBuilder =
       Value<bool> qrisEnabled,
       Value<String?> qrisProvider,
       Value<String?> qrisMerchantId,
+      Value<String?> qrisImagePath,
       Value<String?> qrisInstruction,
       Value<bool> debitEnabled,
       Value<String?> debitProvider,
@@ -16024,6 +16081,7 @@ typedef $$PaymentSettingsTableUpdateCompanionBuilder =
       Value<bool> qrisEnabled,
       Value<String?> qrisProvider,
       Value<String?> qrisMerchantId,
+      Value<String?> qrisImagePath,
       Value<String?> qrisInstruction,
       Value<bool> debitEnabled,
       Value<String?> debitProvider,
@@ -16065,6 +16123,11 @@ class $$PaymentSettingsTableFilterComposer
 
   ColumnFilters<String> get qrisMerchantId => $composableBuilder(
     column: $table.qrisMerchantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get qrisImagePath => $composableBuilder(
+    column: $table.qrisImagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16158,6 +16221,11 @@ class $$PaymentSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get qrisImagePath => $composableBuilder(
+    column: $table.qrisImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get qrisInstruction => $composableBuilder(
     column: $table.qrisInstruction,
     builder: (column) => ColumnOrderings(column),
@@ -16243,6 +16311,11 @@ class $$PaymentSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get qrisMerchantId => $composableBuilder(
     column: $table.qrisMerchantId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get qrisImagePath => $composableBuilder(
+    column: $table.qrisImagePath,
     builder: (column) => column,
   );
 
@@ -16344,6 +16417,7 @@ class $$PaymentSettingsTableTableManager
                 Value<bool> qrisEnabled = const Value.absent(),
                 Value<String?> qrisProvider = const Value.absent(),
                 Value<String?> qrisMerchantId = const Value.absent(),
+                Value<String?> qrisImagePath = const Value.absent(),
                 Value<String?> qrisInstruction = const Value.absent(),
                 Value<bool> debitEnabled = const Value.absent(),
                 Value<String?> debitProvider = const Value.absent(),
@@ -16362,6 +16436,7 @@ class $$PaymentSettingsTableTableManager
                 qrisEnabled: qrisEnabled,
                 qrisProvider: qrisProvider,
                 qrisMerchantId: qrisMerchantId,
+                qrisImagePath: qrisImagePath,
                 qrisInstruction: qrisInstruction,
                 debitEnabled: debitEnabled,
                 debitProvider: debitProvider,
@@ -16382,6 +16457,7 @@ class $$PaymentSettingsTableTableManager
                 Value<bool> qrisEnabled = const Value.absent(),
                 Value<String?> qrisProvider = const Value.absent(),
                 Value<String?> qrisMerchantId = const Value.absent(),
+                Value<String?> qrisImagePath = const Value.absent(),
                 Value<String?> qrisInstruction = const Value.absent(),
                 Value<bool> debitEnabled = const Value.absent(),
                 Value<String?> debitProvider = const Value.absent(),
@@ -16400,6 +16476,7 @@ class $$PaymentSettingsTableTableManager
                 qrisEnabled: qrisEnabled,
                 qrisProvider: qrisProvider,
                 qrisMerchantId: qrisMerchantId,
+                qrisImagePath: qrisImagePath,
                 qrisInstruction: qrisInstruction,
                 debitEnabled: debitEnabled,
                 debitProvider: debitProvider,

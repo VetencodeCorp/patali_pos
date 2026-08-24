@@ -835,6 +835,7 @@ class _CartPanel extends ConsumerWidget {
     final cashSession = ref.watch(activeCashSessionProvider).valueOrNull;
     final settings = ref.watch(appSettingsProvider).valueOrNull;
     final cashierSettings = ref.watch(cashierSettingsProvider).valueOrNull;
+    final paymentSettings = ref.watch(paymentSettingsProvider).valueOrNull;
     final manualDiscountEnabled =
         cashierSettings?.manualDiscountEnabled ?? true;
     final currency = NumberFormat.currency(
@@ -1001,6 +1002,10 @@ class _CartPanel extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _PaymentMethodSelector(enabled: cartItems.isNotEmpty),
+          if (paymentMethod == 'qris') ...[
+            const SizedBox(height: 12),
+            _QrisPaymentPanel(settings: paymentSettings),
+          ],
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed:
@@ -1147,6 +1152,91 @@ class _PaymentMethodSelector extends ConsumerWidget {
                   : null,
             ),
       ],
+    );
+  }
+}
+
+class _QrisPaymentPanel extends StatelessWidget {
+  const _QrisPaymentPanel({required this.settings});
+
+  final PaymentSetting? settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath = settings?.qrisImagePath;
+    final provider = settings?.qrisProvider;
+    final instruction = settings?.qrisInstruction;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _surfaceTint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.qr_code_2, color: _brand, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  provider?.trim().isEmpty ?? true ? 'QRIS Manual' : provider!,
+                  style: const TextStyle(
+                    color: _ink,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              height: 190,
+              color: Colors.white,
+              child: imagePath == null || imagePath.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Foto QRIS belum diatur',
+                        style: TextStyle(
+                          color: _muted,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  : Image.file(
+                      File(imagePath),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                            child: Text(
+                              'QRIS tidak bisa dibuka',
+                              style: TextStyle(
+                                color: _muted,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                    ),
+            ),
+          ),
+          if (instruction != null && instruction.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              instruction,
+              style: const TextStyle(
+                color: _muted,
+                fontWeight: FontWeight.w700,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

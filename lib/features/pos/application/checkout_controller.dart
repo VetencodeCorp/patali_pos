@@ -41,6 +41,10 @@ class CheckoutController extends AsyncNotifier<void> {
         : 0;
     final grandTotal = taxableAmount + taxTotal + serviceTotal;
     final orderType = ref.read(selectedOrderTypeProvider);
+    final customerId = ref.read(selectedCustomerIdProvider);
+    if (cashierSettings.customerRequired && customerId == null) {
+      throw StateError('Pelanggan wajib dipilih');
+    }
     final cashSession = await ref.read(activeCashSessionProvider.future);
     if (cashSession == null) {
       throw StateError('Kasir belum dibuka');
@@ -60,6 +64,7 @@ class CheckoutController extends AsyncNotifier<void> {
               ),
           ],
           cashSessionId: cashSession.id,
+          customerId: customerId,
           orderType: orderType,
           paymentMethod: safePaymentMethod,
           invoicePrefix: cashierSettings.invoicePrefix,
@@ -76,6 +81,7 @@ class CheckoutController extends AsyncNotifier<void> {
         cashierSettings.defaultPaymentMethod;
     ref.read(selectedOrderTypeProvider.notifier).state =
         cashierSettings.defaultOrderType;
+    ref.read(selectedCustomerIdProvider.notifier).state = null;
     return order;
   }
 }

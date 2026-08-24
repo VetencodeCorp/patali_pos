@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../data/database/app_database.dart';
@@ -30,6 +35,7 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
   final _transferInstructionController = TextEditingController();
 
   bool _qrisEnabled = true;
+  String? _qrisImagePath;
   bool _debitEnabled = true;
   bool _transferEnabled = true;
   bool _hydrated = false;
@@ -79,7 +85,12 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
                     _transferAccountNumberController,
                 transferAccountNameController: _transferAccountNameController,
                 transferInstructionController: _transferInstructionController,
+                qrisImagePath: _qrisImagePath,
                 onQrisChanged: (value) => setState(() => _qrisEnabled = value),
+                onPickQrisImage: _pickQrisImage,
+                onClearQrisImage: _qrisImagePath == null
+                    ? null
+                    : () => setState(() => _qrisImagePath = null),
                 onDebitChanged: (value) =>
                     setState(() => _debitEnabled = value),
                 onTransferChanged: (value) {
@@ -89,6 +100,7 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
               );
               final summary = _PaymentSummary(
                 qrisEnabled: _qrisEnabled,
+                qrisImagePath: _qrisImagePath,
                 debitEnabled: _debitEnabled,
                 transferEnabled: _transferEnabled,
                 qrisProvider: _qrisProviderController.text,
@@ -123,6 +135,7 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
     _qrisEnabled = settings.qrisEnabled;
     _qrisProviderController.text = settings.qrisProvider ?? '';
     _qrisMerchantIdController.text = settings.qrisMerchantId ?? '';
+    _qrisImagePath = settings.qrisImagePath;
     _qrisInstructionController.text = settings.qrisInstruction ?? '';
     _debitEnabled = settings.debitEnabled;
     _debitProviderController.text = settings.debitProvider ?? '';
@@ -146,6 +159,7 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
             qrisEnabled: _qrisEnabled,
             qrisProvider: _qrisProviderController.text,
             qrisMerchantId: _qrisMerchantIdController.text,
+            qrisImagePath: _qrisImagePath ?? '',
             qrisInstruction: _qrisInstructionController.text,
             debitEnabled: _debitEnabled,
             debitProvider: _debitProviderController.text,
@@ -170,6 +184,43 @@ class _PaymentSettingsScreenState extends ConsumerState<PaymentSettingsScreen> {
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  Future<void> _pickQrisImage() async {
+    try {
+      final file = await openFile(
+        acceptedTypeGroups: const [
+          XTypeGroup(
+            label: 'Gambar QRIS',
+            extensions: ['jpg', 'jpeg', 'png', 'webp'],
+          ),
+        ],
+      );
+      if (file == null) return;
+      final savedPath = await _copyImageToAppDirectory(file);
+      if (!mounted) return;
+      setState(() => _qrisImagePath = savedPath);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal memilih QRIS: $error')));
+    }
+  }
+
+  Future<String> _copyImageToAppDirectory(XFile source) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final targetDir = Directory(p.join(appDir.path, 'patali_payment_images'));
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+    final extension = p.extension(source.name).isEmpty
+        ? '.jpg'
+        : p.extension(source.name);
+    final fileName = 'qris_${DateTime.now().millisecondsSinceEpoch}$extension';
+    final targetPath = p.join(targetDir.path, fileName);
+    await File(targetPath).writeAsBytes(await source.readAsBytes());
+    return targetPath;
+  }
 }
 
 class _PaymentForm extends StatelessWidget {
@@ -188,7 +239,10 @@ class _PaymentForm extends StatelessWidget {
     required this.transferAccountNumberController,
     required this.transferAccountNameController,
     required this.transferInstructionController,
+    required this.qrisImagePath,
     required this.onQrisChanged,
+    required this.onPickQrisImage,
+    required this.onClearQrisImage,
     required this.onDebitChanged,
     required this.onTransferChanged,
     required this.onSave,
@@ -208,7 +262,10 @@ class _PaymentForm extends StatelessWidget {
   final TextEditingController transferAccountNumberController;
   final TextEditingController transferAccountNameController;
   final TextEditingController transferInstructionController;
+  final String? qrisImagePath;
   final ValueChanged<bool> onQrisChanged;
+  final VoidCallback onPickQrisImage;
+  final VoidCallback? onClearQrisImage;
   final ValueChanged<bool> onDebitChanged;
   final ValueChanged<bool> onTransferChanged;
   final VoidCallback onSave;
@@ -240,6 +297,12 @@ class _PaymentForm extends StatelessWidget {
                     label: 'Merchant ID',
                     hint: 'Contoh: MID-123456',
                     controller: qrisMerchantIdController,
+                  ),
+                  const SizedBox(height: 12),
+                  _QrisImagePicker(
+                    imagePath: qrisImagePath,
+                    onPick: onPickQrisImage,
+                    onClear: onClearQrisImage,
                   ),
                   const SizedBox(height: 12),
                   _LabeledTextField(
@@ -375,6 +438,7 @@ class _PaymentSummary extends StatelessWidget {
     required this.qrisEnabled,
     required this.debitEnabled,
     required this.transferEnabled,
+    required this.qrisImagePath,
     required this.qrisProvider,
     required this.debitProvider,
     required this.transferBankName,
@@ -383,6 +447,7 @@ class _PaymentSummary extends StatelessWidget {
   final bool qrisEnabled;
   final bool debitEnabled;
   final bool transferEnabled;
+  final String? qrisImagePath;
   final String qrisProvider;
   final String debitProvider;
   final String transferBankName;
@@ -406,7 +471,9 @@ class _PaymentSummary extends StatelessWidget {
               _StatusRow('Tunai', 'Selalu aktif'),
               _StatusRow(
                 'QRIS',
-                qrisEnabled ? _value(qrisProvider) : 'Nonaktif',
+                qrisEnabled
+                    ? '${_value(qrisProvider)} - ${qrisImagePath == null ? 'tanpa foto' : 'foto ada'}'
+                    : 'Nonaktif',
               ),
               _StatusRow(
                 'Debit',
@@ -425,6 +492,81 @@ class _PaymentSummary extends StatelessWidget {
 
   String _value(String value) {
     return value.trim().isEmpty ? 'Aktif' : value.trim();
+  }
+}
+
+class _QrisImagePicker extends StatelessWidget {
+  const _QrisImagePicker({
+    required this.imagePath,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  final String? imagePath;
+  final VoidCallback onPick;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Foto QRIS Statis',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 7),
+        Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: 96,
+                height: 96,
+                color: AppColors.softMint,
+                child: imagePath == null || imagePath!.isEmpty
+                    ? const Icon(Icons.qr_code_2, color: AppColors.primary)
+                    : Image.file(
+                        File(imagePath!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.broken_image_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: onPick,
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(
+                      imagePath == null ? 'Pilih QRIS' : 'Ganti QRIS',
+                    ),
+                  ),
+                  if (imagePath != null) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: onClear,
+                      icon: const Icon(Icons.close),
+                      label: const Text('Hapus QRIS'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
 

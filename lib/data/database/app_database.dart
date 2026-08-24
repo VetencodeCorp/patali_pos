@@ -89,6 +89,22 @@ class Users extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class Customers extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get email => text().nullable()();
+  TextColumn get address => text().nullable()();
+  TextColumn get note => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 class CashSessions extends Table {
   TextColumn get id => text()();
   @ReferenceName('openedCashSessions')
@@ -114,6 +130,7 @@ class Orders extends Table {
   TextColumn get cashSessionId =>
       text().nullable().references(CashSessions, #id)();
   TextColumn get cashierUserId => text().nullable().references(Users, #id)();
+  TextColumn get customerId => text().nullable().references(Customers, #id)();
   TextColumn get orderNumber => text()();
   TextColumn get status => text().withDefault(const Constant('completed'))();
   TextColumn get orderType => text().withDefault(const Constant('takeaway'))();
@@ -249,6 +266,7 @@ class PaymentSettings extends Table {
   BoolColumn get qrisEnabled => boolean().withDefault(const Constant(true))();
   TextColumn get qrisProvider => text().nullable()();
   TextColumn get qrisMerchantId => text().nullable()();
+  TextColumn get qrisImagePath => text().nullable()();
   TextColumn get qrisInstruction => text().nullable()();
   BoolColumn get debitEnabled => boolean().withDefault(const Constant(true))();
   TextColumn get debitProvider => text().nullable()();
@@ -275,6 +293,7 @@ class PaymentSettings extends Table {
     Permissions,
     RolePermissions,
     Users,
+    Customers,
     CashSessions,
     Orders,
     OrderItems,
@@ -292,7 +311,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -311,6 +330,16 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await migrator.createTable(paymentSettings);
+      }
+      if (from < 7) {
+        await migrator.addColumn(
+          paymentSettings,
+          paymentSettings.qrisImagePath,
+        );
+      }
+      if (from < 8) {
+        await migrator.createTable(customers);
+        await migrator.addColumn(orders, orders.customerId);
       }
     },
   );

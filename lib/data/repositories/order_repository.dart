@@ -105,6 +105,7 @@ class OrderRepository {
   Future<Order> createCashOrder({
     required List<CreateOrderItem> items,
     required String cashSessionId,
+    String? customerId,
     String orderType = 'takeaway',
     String paymentMethod = 'cash',
     String invoicePrefix = 'INV',
@@ -137,6 +138,7 @@ class OrderRepository {
               id: orderId,
               cashSessionId: Value(cashSessionId),
               cashierUserId: const Value(devOwnerUserId),
+              customerId: Value(customerId),
               orderNumber: orderNumber,
               orderType: Value(orderType),
               subtotal: Value(subtotal),
@@ -186,6 +188,7 @@ class OrderRepository {
                 'order_id': orderId,
                 'order_number': orderNumber,
                 'cash_session_id': cashSessionId,
+                'customer_id': customerId,
                 'order_type': orderType,
                 'payment_method': paymentMethod,
                 'subtotal': subtotal,
