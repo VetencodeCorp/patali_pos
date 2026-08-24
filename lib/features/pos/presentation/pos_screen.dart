@@ -284,30 +284,50 @@ class _PosHeader extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerStatefulWidget {
   const _SearchBar();
 
   @override
+  ConsumerState<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends ConsumerState<_SearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final query = ref.watch(productSearchQueryProvider);
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Row(
         children: [
           Expanded(
-            child: _GlassPanel(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.search, color: _muted, size: 22),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Cari produk',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: _muted,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+            child: TextField(
+              controller: _controller,
+              onChanged: (value) {
+                ref.read(productSearchQueryProvider.notifier).state = value;
+              },
+              decoration: InputDecoration(
+                hintText: 'Cari produk, SKU, atau barcode',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Hapus pencarian',
+                        onPressed: () {
+                          _controller.clear();
+                          ref.read(productSearchQueryProvider.notifier).state =
+                              '';
+                          FocusScope.of(context).unfocus();
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
               ),
             ),
           ),
@@ -316,7 +336,7 @@ class _SearchBar extends StatelessWidget {
             height: 48,
             width: 52,
             child: FilledButton(
-              onPressed: () {},
+              onPressed: () => _showBarcodeDialog(context, ref),
               style: FilledButton.styleFrom(
                 padding: EdgeInsets.zero,
                 backgroundColor: _ink,
@@ -330,6 +350,69 @@ class _SearchBar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showBarcodeDialog(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final code = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Scan Barcode'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Barcode / SKU',
+              hintText: 'Contoh: 8991234567890',
+            ),
+            onSubmitted: (value) => Navigator.of(context).pop(value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text),
+              child: const Text('Tambah'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    if (code == null || code.trim().isEmpty || !context.mounted) return;
+
+    final normalized = code.trim().toLowerCase();
+    final products = await ref.read(activeProductsProvider.future);
+    Product? matched;
+    for (final product in products) {
+      final barcode = product.barcode?.trim().toLowerCase();
+      final sku = product.sku?.trim().toLowerCase();
+      if (barcode == normalized || sku == normalized) {
+        matched = product;
+        break;
+      }
+    }
+
+    if (!context.mounted) return;
+    if (matched == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Produk barcode $code tidak ditemukan')),
+      );
+      return;
+    }
+    if (matched.trackStock && matched.stockQty <= 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Stok ${matched.name} habis')));
+      return;
+    }
+    ref.read(cartControllerProvider.notifier).addProduct(matched);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${matched.name} masuk cart')));
   }
 }
 
@@ -384,8 +467,16 @@ class _ProductGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(productSearchQueryProvider);
     if (products.isEmpty) {
-      return const Center(child: Text('Belum ada produk'));
+      return Center(
+        child: Text(
+          query.trim().isEmpty
+              ? 'Belum ada produk'
+              : 'Produk "${query.trim()}" tidak ditemukan',
+          textAlign: TextAlign.center,
+        ),
+      );
     }
 
     final currency = NumberFormat.currency(

@@ -16,13 +16,30 @@ final activeProductsProvider = StreamProvider<List<Product>>((ref) {
 
 final selectedCategoryIdProvider = StateProvider<String?>((ref) => null);
 
+final productSearchQueryProvider = StateProvider<String>((ref) => '');
+
 final filteredProductsProvider = StreamProvider<List<Product>>((ref) {
   ref.watch(devSeedProvider);
   final categoryId = ref.watch(selectedCategoryIdProvider);
+  final query = ref.watch(productSearchQueryProvider).trim().toLowerCase();
   return ref
       .watch(productRepositoryProvider)
-      .watchActiveProducts(categoryId: categoryId);
+      .watchActiveProducts(categoryId: categoryId)
+      .map((products) {
+        if (query.isEmpty) return products;
+        return products
+            .where((product) => matchesProductSearch(product, query))
+            .toList();
+      });
 });
+
+bool matchesProductSearch(Product product, String query) {
+  final normalized = query.trim().toLowerCase();
+  if (normalized.isEmpty) return true;
+  return product.name.toLowerCase().contains(normalized) ||
+      (product.sku?.toLowerCase().contains(normalized) ?? false) ||
+      (product.barcode?.toLowerCase().contains(normalized) ?? false);
+}
 
 final devSeedProvider = FutureProvider<void>((ref) async {
   await ref.watch(productRepositoryProvider).seedDevProducts();
