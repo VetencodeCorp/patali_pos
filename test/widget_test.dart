@@ -149,7 +149,8 @@ void main() {
     expect(find.text('Subtotal (1 item)'), findsOneWidget);
     expect(find.text('Rp 18.000'), findsWidgets);
 
-    await tester.tap(find.byTooltip('Tambah'));
+    await tester.ensureVisible(find.byIcon(Icons.add).last);
+    await tester.tap(find.byIcon(Icons.add).last);
     await tester.pumpAndSettle();
 
     expect(find.text('2'), findsOneWidget);

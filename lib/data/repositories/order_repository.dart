@@ -35,6 +35,10 @@ final orderReceiptProvider = FutureProvider.family<OrderReceipt, String>((
   return ref.watch(orderRepositoryProvider).getReceipt(orderId);
 });
 
+final kitchenOrdersProvider = StreamProvider<List<KitchenOrder>>((ref) {
+  return ref.watch(orderRepositoryProvider).watchKitchenOrders();
+});
+
 class OrderRepository {
   OrderRepository(this._database);
 
@@ -57,6 +61,10 @@ class OrderRepository {
       leftOuterJoin(
         _database.payments,
         _database.payments.orderId.equalsExp(_database.orders.id),
+      ),
+      leftOuterJoin(
+        _database.customers,
+        _database.customers.id.equalsExp(_database.orders.customerId),
       ),
     ]);
 
@@ -83,6 +91,7 @@ class OrderRepository {
           OrderListItem(
             order: row.readTable(_database.orders),
             payment: row.readTableOrNull(_database.payments),
+            customer: row.readTableOrNull(_database.customers),
           ),
       ];
     });
@@ -98,8 +107,100 @@ class OrderRepository {
     final payments = await (_database.select(
       _database.payments,
     )..where((payment) => payment.orderId.equals(orderId))).get();
+    final customerId = order.customerId;
+    final customer = customerId == null
+        ? null
+        : await (_database.select(_database.customers)
+                ..where((customer) => customer.id.equals(customerId)))
+              .getSingleOrNull();
 
-    return OrderReceipt(order: order, items: items, payments: payments);
+    return OrderReceipt(
+      order: order,
+      items: items,
+      payments: payments,
+      customer: customer,
+    );
+  }
+
+  Stream<List<KitchenOrder>> watchKitchenOrders({DateTime? date}) {
+    final value = date ?? DateTime.now();
+    final start = DateTime(value.year, value.month, value.day);
+    final end = start.add(const Duration(days: 1));
+    final query =
+        _database.select(_database.orders).join([
+            innerJoin(
+              _database.orderItems,
+              _database.orderItems.orderId.equalsExp(_database.orders.id),
+            ),
+          ])
+          ..where(
+            _database.orders.orderedAt.isBiggerOrEqualValue(start) &
+                _database.orders.orderedAt.isSmallerThanValue(end) &
+                _database.orders.status.equals('completed'),
+          )
+          ..orderBy([
+            OrderingTerm.asc(_database.orders.orderedAt),
+            OrderingTerm.asc(_database.orderItems.createdAt),
+          ]);
+
+    return query.watch().map((rows) {
+      final grouped = <String, KitchenOrder>{};
+      for (final row in rows) {
+        final order = row.readTable(_database.orders);
+        final item = row.readTable(_database.orderItems);
+        final existing = grouped[order.id];
+        if (existing == null) {
+          grouped[order.id] = KitchenOrder(order: order, items: [item]);
+        } else {
+          existing.items.add(item);
+        }
+      }
+
+      return grouped.values
+          .where(
+            (order) =>
+                order.items.any((item) => item.kitchenStatus != 'served'),
+          )
+          .toList();
+    });
+  }
+
+  Future<void> updateKitchenStatus({
+    required String orderItemId,
+    required String status,
+  }) async {
+    const statuses = {'pending', 'preparing', 'ready', 'served'};
+    if (!statuses.contains(status)) {
+      throw ArgumentError.value(status, 'status', 'Status dapur tidak valid');
+    }
+
+    final now = DateTime.now();
+    await _database.transaction(() async {
+      await (_database.update(
+        _database.orderItems,
+      )..where((item) => item.id.equals(orderItemId))).write(
+        OrderItemsCompanion(
+          kitchenStatus: Value(status),
+          updatedAt: Value(now),
+        ),
+      );
+
+      await _database
+          .into(_database.syncQueue)
+          .insert(
+            SyncQueueCompanion.insert(
+              id: _uuid.v4(),
+              entityType: 'order_item',
+              entityId: orderItemId,
+              action: 'kitchen_status_update',
+              payloadJson: jsonEncode({
+                'order_item_id': orderItemId,
+                'kitchen_status': status,
+                'updated_at': now.toIso8601String(),
+              }),
+            ),
+          );
+    });
   }
 
   Future<Order> createCashOrder({
@@ -341,10 +442,15 @@ class OrderRepository {
 }
 
 class OrderListItem {
-  const OrderListItem({required this.order, required this.payment});
+  const OrderListItem({
+    required this.order,
+    required this.payment,
+    this.customer,
+  });
 
   final Order order;
   final Payment? payment;
+  final Customer? customer;
 }
 
 class OrderReceipt {
@@ -352,11 +458,20 @@ class OrderReceipt {
     required this.order,
     required this.items,
     required this.payments,
+    this.customer,
   });
 
   final Order order;
   final List<OrderItem> items;
   final List<Payment> payments;
+  final Customer? customer;
+}
+
+class KitchenOrder {
+  KitchenOrder({required this.order, required this.items});
+
+  final Order order;
+  final List<OrderItem> items;
 }
 
 class CreateOrderItem {

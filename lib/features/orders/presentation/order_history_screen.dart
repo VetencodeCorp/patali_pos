@@ -142,8 +142,11 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
     return items.where((item) {
       final order = item.order;
       final payment = item.payment;
+      final customer = item.customer;
       return order.orderNumber.toLowerCase().contains(_query) ||
           order.status.toLowerCase().contains(_query) ||
+          (customer?.name.toLowerCase().contains(_query) ?? false) ||
+          (customer?.phone?.toLowerCase().contains(_query) ?? false) ||
           _paymentLabel(payment?.method).toLowerCase().contains(_query);
     }).toList();
   }
@@ -366,6 +369,7 @@ class _OrderHistoryTile extends ConsumerWidget {
     );
     final dateFormat = DateFormat('dd MMM yyyy HH:mm', 'id_ID');
     final paymentLabel = _paymentLabel(payment?.method);
+    final customerLabel = item.customer?.name ?? 'Walk-in';
 
     return PataliCard(
       onTap: () => context.push(ReceiptScreen.location(order.id)),
@@ -397,7 +401,7 @@ class _OrderHistoryTile extends ConsumerWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  dateFormat.format(order.orderedAt),
+                  '${dateFormat.format(order.orderedAt)} - $customerLabel',
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w700,

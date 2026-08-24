@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/patali_card.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import '../../customers/presentation/customer_management_screen.dart';
+import '../../kitchen/presentation/kitchen_display_screen.dart';
 import 'cashier_settings_screen.dart';
 import 'device_settings_screen.dart';
 import 'payment_settings_screen.dart';
@@ -31,6 +33,18 @@ class SettingsScreen extends StatelessWidget {
             title: 'Produk & Kategori',
             subtitle: 'Produk, kategori, harga, stok, aktif/nonaktif',
             onTap: () => context.push(ProductManagementScreen.routePath),
+          ),
+          _SettingEntry(
+            icon: Icons.people_alt_outlined,
+            title: 'Pelanggan',
+            subtitle: 'Member, nomor HP, alamat, catatan, aktif/nonaktif',
+            onTap: () => context.push(CustomerManagementScreen.routePath),
+          ),
+          _SettingEntry(
+            icon: Icons.restaurant_menu_outlined,
+            title: 'Dapur / KDS',
+            subtitle: 'Lihat order masuk dan update status masakan',
+            onTap: () => context.push(KitchenDisplayScreen.routePath),
           ),
           _SettingEntry(
             icon: Icons.receipt_long_outlined,

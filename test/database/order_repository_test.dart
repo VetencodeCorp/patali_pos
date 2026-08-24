@@ -87,6 +87,83 @@ void main() {
     expect(order.orderType, 'Meja');
   });
 
+  test('loads customer in history and receipt', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+    await database
+        .into(database.customers)
+        .insert(CustomersCompanion.insert(id: 'cust-andi', name: 'Andi'));
+
+    final order = await orders.createCashOrder(
+      cashSessionId: session.id,
+      customerId: 'cust-andi',
+      subtotal: 18000,
+      discountTotal: 0,
+      grandTotal: 18000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+      ],
+    );
+
+    final history = await orders.watchOrderHistory().first;
+    final receipt = await orders.getReceipt(order.id);
+
+    expect(history.single.customer?.name, 'Andi');
+    expect(receipt.customer?.name, 'Andi');
+  });
+
+  test('watches kitchen orders and updates item status', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+    await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 35000,
+      discountTotal: 0,
+      grandTotal: 35000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+        CreateOrderItem(
+          productId: 'prod-roti-bakar',
+          productName: 'Roti Bakar',
+          qty: 1,
+          unitPrice: 17000,
+          lineTotal: 17000,
+        ),
+      ],
+    );
+
+    var kitchen = await orders.watchKitchenOrders().first;
+
+    expect(kitchen, hasLength(1));
+    expect(kitchen.single.items, hasLength(2));
+    expect(kitchen.single.items.first.kitchenStatus, 'pending');
+
+    await orders.updateKitchenStatus(
+      orderItemId: kitchen.single.items.first.id,
+      status: 'ready',
+    );
+    kitchen = await orders.watchKitchenOrders().first;
+
+    expect(kitchen.single.items.first.kitchenStatus, 'ready');
+
+    for (final item in kitchen.single.items) {
+      await orders.updateKitchenStatus(orderItemId: item.id, status: 'served');
+    }
+    kitchen = await orders.watchKitchenOrders().first;
+
+    expect(kitchen, isEmpty);
+  });
+
   test('builds order number from cashier invoice settings', () async {
     final session = await cashSessions.openSession(openingCash: 0);
 

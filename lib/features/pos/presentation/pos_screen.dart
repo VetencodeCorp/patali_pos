@@ -12,9 +12,11 @@ import '../../../data/repositories/app_settings_repository.dart';
 import '../../../data/repositories/cash_session_repository.dart';
 import '../../../data/repositories/cashier_settings_repository.dart';
 import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/customer_repository.dart';
 import '../../../data/repositories/payment_settings_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import '../../customers/presentation/customer_management_screen.dart';
 import '../../orders/presentation/order_history_screen.dart';
 import '../../orders/presentation/receipt_screen.dart';
 import '../application/cart_controller.dart';
@@ -609,6 +611,10 @@ class _MobilePosActionBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartControllerProvider);
     final orderType = ref.watch(selectedOrderTypeProvider);
+    final selectedCustomerId = ref.watch(selectedCustomerIdProvider);
+    final selectedCustomer = selectedCustomerId == null
+        ? null
+        : ref.watch(customerByIdProvider(selectedCustomerId)).valueOrNull;
     final discount = ref.watch(cartDiscountProvider);
     final settings = ref.watch(appSettingsProvider).valueOrNull;
     final currency = NumberFormat.currency(
@@ -646,12 +652,8 @@ class _MobilePosActionBar extends ConsumerWidget {
                   ),
                   _MobileActionButton(
                     icon: Icons.person_add_alt_1_outlined,
-                    label: 'Pelanggan',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pelanggan menyusul')),
-                      );
-                    },
+                    label: selectedCustomer?.name ?? 'Pelanggan',
+                    onTap: () => _showCustomerPicker(context, ref),
                   ),
                   _MobileActionButton(
                     icon: Icons.room_service_outlined,
@@ -721,9 +723,10 @@ class _MobilePosActionBar extends ConsumerWidget {
           maxChildSize: 0.92,
           expand: false,
           builder: (context, scrollController) {
-            return const Padding(
-              padding: EdgeInsets.all(12),
-              child: _CartPanel(wide: false),
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(12),
+              child: const _CartPanel(wide: false),
             );
           },
         );
@@ -923,6 +926,7 @@ class _CartPanel extends ConsumerWidget {
                         cashierSettings?.defaultPaymentMethod ?? 'cash';
                     ref.read(selectedOrderTypeProvider.notifier).state =
                         cashierSettings?.defaultOrderType ?? 'Bungkus';
+                    ref.read(selectedCustomerIdProvider.notifier).state = null;
                   },
                   icon: const Icon(Icons.delete_sweep_outlined),
                 ),
@@ -931,11 +935,19 @@ class _CartPanel extends ConsumerWidget {
           const SizedBox(height: 14),
           if (cartItems.isEmpty)
             _EmptyCart(wide: wide)
+          else if (!wide)
+            Column(
+              children: [
+                for (final (index, item) in cartItems.indexed) ...[
+                  if (index > 0) const SizedBox(height: 8),
+                  _CartItemTile(item: item, currency: currency),
+                ],
+              ],
+            )
           else
             Flexible(
-              fit: wide ? FlexFit.tight : FlexFit.loose,
+              fit: FlexFit.tight,
               child: ListView.separated(
-                shrinkWrap: !wide,
                 itemCount: cartItems.length,
                 separatorBuilder: (context, index) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
@@ -947,6 +959,8 @@ class _CartPanel extends ConsumerWidget {
           if (wide && cartItems.isEmpty) const Spacer(),
           if (!wide) const SizedBox(height: 14),
           const Divider(height: 24),
+          _CustomerSelectorRow(enabled: cartItems.isNotEmpty),
+          const SizedBox(height: 8),
           _CartAmountRow(
             label: 'Subtotal (${cartItems.totalQty} item)',
             value: currency.format(subtotal),
@@ -1154,6 +1168,103 @@ class _PaymentMethodSelector extends ConsumerWidget {
       ],
     );
   }
+}
+
+class _CustomerSelectorRow extends ConsumerWidget {
+  const _CustomerSelectorRow({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customerId = ref.watch(selectedCustomerIdProvider);
+    final customer = customerId == null
+        ? null
+        : ref.watch(customerByIdProvider(customerId)).valueOrNull;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: enabled ? () => _showCustomerPicker(context, ref) : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: _CartAmountRow(
+          label: 'Pelanggan',
+          value: customer?.name ?? 'Walk-in',
+          valueColor: _brand,
+          trailingIcon: Icons.person_search_outlined,
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showCustomerPicker(BuildContext context, WidgetRef ref) async {
+  final selectedId = ref.read(selectedCustomerIdProvider);
+  final customers = await ref.read(activeCustomersProvider.future);
+  if (!context.mounted) return;
+
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    useSafeArea: true,
+    builder: (context) {
+      return SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          children: [
+            Text(
+              'Pilih Pelanggan',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text(
+                'Walk-in Customer',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              trailing: selectedId == null ? const Icon(Icons.check) : null,
+              onTap: () {
+                ref.read(selectedCustomerIdProvider.notifier).state = null;
+                Navigator.of(context).pop();
+              },
+            ),
+            for (final customer in customers)
+              ListTile(
+                leading: const Icon(Icons.badge_outlined),
+                title: Text(
+                  customer.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: customer.phone == null ? null : Text(customer.phone!),
+                trailing: selectedId == customer.id
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () {
+                  ref.read(selectedCustomerIdProvider.notifier).state =
+                      customer.id;
+                  Navigator.of(context).pop();
+                },
+              ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.push(CustomerManagementScreen.routePath);
+              },
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              label: const Text('Kelola Pelanggan'),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _QrisPaymentPanel extends StatelessWidget {
@@ -1371,21 +1482,20 @@ class _QtyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: _surface,
         borderRadius: BorderRadius.circular(11),
-        onTap: onPressed,
-        child: Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: _surface,
-            borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: _border),
-          ),
-          child: Icon(icon, size: 18, color: _brand),
-        ),
+        border: Border.all(color: _border),
+      ),
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 34, height: 34),
+        icon: Icon(icon, size: 18, color: _brand),
       ),
     );
   }

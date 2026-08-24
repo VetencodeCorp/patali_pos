@@ -42,9 +42,6 @@ class CheckoutController extends AsyncNotifier<void> {
     final grandTotal = taxableAmount + taxTotal + serviceTotal;
     final orderType = ref.read(selectedOrderTypeProvider);
     final customerId = ref.read(selectedCustomerIdProvider);
-    if (cashierSettings.customerRequired && customerId == null) {
-      throw StateError('Pelanggan wajib dipilih');
-    }
     final cashSession = await ref.read(activeCashSessionProvider.future);
     if (cashSession == null) {
       throw StateError('Kasir belum dibuka');

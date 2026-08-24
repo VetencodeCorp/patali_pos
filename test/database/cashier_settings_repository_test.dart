@@ -40,6 +40,6 @@ void main() {
     expect(saved.defaultPaymentMethod, 'qris');
     expect(saved.defaultOrderType, 'Meja');
     expect(saved.manualDiscountEnabled, isFalse);
-    expect(saved.customerRequired, isTrue);
+    expect(saved.customerRequired, isFalse);
   });
 }

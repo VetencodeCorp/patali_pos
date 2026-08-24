@@ -1,6 +1,9 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/dev_login_screen.dart';
+import '../../features/customers/presentation/customer_form_screen.dart';
+import '../../features/customers/presentation/customer_management_screen.dart';
+import '../../features/kitchen/presentation/kitchen_display_screen.dart';
 import '../../features/orders/presentation/order_history_screen.dart';
 import '../../features/orders/presentation/receipt_screen.dart';
 import '../../features/pos/presentation/pos_screen.dart';
@@ -36,10 +39,30 @@ final appRouter = GoRouter(
       builder: (context, state) => const OrderHistoryScreen(),
     ),
     GoRoute(
+      path: CustomerManagementScreen.routePath,
+      builder: (context, state) => const CustomerManagementScreen(),
+    ),
+    GoRoute(
+      path: CustomerFormScreen.createRoutePath,
+      builder: (context, state) => const CustomerFormScreen(),
+    ),
+    GoRoute(
+      path: CustomerFormScreen.editRoutePath,
+      builder: (context, state) {
+        return CustomerFormScreen(
+          customerId: state.pathParameters['customerId']!,
+        );
+      },
+    ),
+    GoRoute(
       path: ReceiptScreen.routePath,
       builder: (context, state) {
         return ReceiptScreen(orderId: state.pathParameters['orderId']!);
       },
+    ),
+    GoRoute(
+      path: KitchenDisplayScreen.routePath,
+      builder: (context, state) => const KitchenDisplayScreen(),
     ),
     GoRoute(
       path: SettingsScreen.routePath,

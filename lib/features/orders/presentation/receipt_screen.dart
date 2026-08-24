@@ -60,6 +60,8 @@ class ReceiptScreen extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(data.order.orderNumber),
                       Text(dateFormat.format(data.order.orderedAt)),
+                      if (data.customer != null)
+                        Text('Pelanggan: ${data.customer!.name}'),
                     ],
                   ),
                 ),

@@ -9,6 +9,7 @@ void main() {
     final receipt = OrderReceipt(
       order: Order(
         id: 'order-1',
+        customerId: 'cust-andi',
         orderNumber: 'INV-20260822-100000',
         status: 'completed',
         orderType: 'takeaway',
@@ -43,12 +44,19 @@ void main() {
           createdAt: now,
         ),
       ],
+      customer: Customer(
+        id: 'cust-andi',
+        name: 'Andi',
+        isActive: true,
+        createdAt: now,
+      ),
     );
 
     final text = ReceiptTextFormatter().format(receipt);
     final lines = text.split('\n').where((line) => line.isNotEmpty);
 
     expect(text, contains('PATALI DEMO OUTLET'));
+    expect(text, contains('Pelanggan: Andi'));
     expect(text, contains('Kopi Susu'));
     expect(text, contains('TOTAL                  Rp 36.000'));
     expect(lines.every((line) => line.length <= 32), isTrue);

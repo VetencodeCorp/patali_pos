@@ -24,7 +24,6 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
   String _defaultPaymentMethod = 'cash';
   String _defaultOrderType = 'Bungkus';
   bool _manualDiscountEnabled = true;
-  bool _customerRequired = false;
   bool _hydrated = false;
   bool _saving = false;
 
@@ -53,7 +52,6 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
                 defaultPaymentMethod: _defaultPaymentMethod,
                 defaultOrderType: _defaultOrderType,
                 manualDiscountEnabled: _manualDiscountEnabled,
-                customerRequired: _customerRequired,
                 saving: _saving,
                 onResetDailyChanged: (value) {
                   setState(() => _resetInvoiceDaily = value);
@@ -69,9 +67,6 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
                 onDiscountChanged: (value) {
                   setState(() => _manualDiscountEnabled = value);
                 },
-                onCustomerRequiredChanged: (value) {
-                  setState(() => _customerRequired = value);
-                },
                 onSave: _save,
               );
               final preview = _InvoicePreview(
@@ -80,7 +75,6 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
                 paymentMethod: _defaultPaymentMethod,
                 orderType: _defaultOrderType,
                 discountEnabled: _manualDiscountEnabled,
-                customerRequired: _customerRequired,
               );
 
               if (wide) {
@@ -112,7 +106,6 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
     _defaultPaymentMethod = settings.defaultPaymentMethod;
     _defaultOrderType = settings.defaultOrderType;
     _manualDiscountEnabled = settings.manualDiscountEnabled;
-    _customerRequired = settings.customerRequired;
     _hydrated = true;
   }
 
@@ -127,7 +120,7 @@ class _CashierSettingsScreenState extends ConsumerState<CashierSettingsScreen> {
             defaultPaymentMethod: _defaultPaymentMethod,
             defaultOrderType: _defaultOrderType,
             manualDiscountEnabled: _manualDiscountEnabled,
-            customerRequired: _customerRequired,
+            customerRequired: false,
           );
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -151,13 +144,11 @@ class _CashierForm extends StatelessWidget {
     required this.defaultPaymentMethod,
     required this.defaultOrderType,
     required this.manualDiscountEnabled,
-    required this.customerRequired,
     required this.saving,
     required this.onResetDailyChanged,
     required this.onPaymentChanged,
     required this.onOrderTypeChanged,
     required this.onDiscountChanged,
-    required this.onCustomerRequiredChanged,
     required this.onSave,
   });
 
@@ -166,13 +157,11 @@ class _CashierForm extends StatelessWidget {
   final String defaultPaymentMethod;
   final String defaultOrderType;
   final bool manualDiscountEnabled;
-  final bool customerRequired;
   final bool saving;
   final ValueChanged<bool> onResetDailyChanged;
   final ValueChanged<String?> onPaymentChanged;
   final ValueChanged<String?> onOrderTypeChanged;
   final ValueChanged<bool> onDiscountChanged;
-  final ValueChanged<bool> onCustomerRequiredChanged;
   final VoidCallback onSave;
 
   @override
@@ -258,13 +247,6 @@ class _CashierForm extends StatelessWidget {
                 value: manualDiscountEnabled,
                 onChanged: onDiscountChanged,
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Wajib pilih pelanggan'),
-                subtitle: const Text('Enforcement penuh menyusul'),
-                value: customerRequired,
-                onChanged: onCustomerRequiredChanged,
-              ),
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: saving ? null : onSave,
@@ -292,7 +274,6 @@ class _InvoicePreview extends StatelessWidget {
     required this.paymentMethod,
     required this.orderType,
     required this.discountEnabled,
-    required this.customerRequired,
   });
 
   final String prefix;
@@ -300,7 +281,6 @@ class _InvoicePreview extends StatelessWidget {
   final String paymentMethod;
   final String orderType;
   final bool discountEnabled;
-  final bool customerRequired;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +311,7 @@ class _InvoicePreview extends StatelessWidget {
                 'Diskon manual',
                 discountEnabled ? 'Aktif' : 'Nonaktif',
               ),
-              _StatusRow('Pelanggan wajib', customerRequired ? 'Ya' : 'Tidak'),
+              const _StatusRow('Pelanggan', 'Opsional'),
             ],
           ),
         ),

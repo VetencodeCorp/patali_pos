@@ -92,7 +92,7 @@ class CashierSettingsRepository {
         defaultPaymentMethod: Value(defaultPaymentMethod),
         defaultOrderType: Value(defaultOrderType),
         manualDiscountEnabled: Value(manualDiscountEnabled),
-        customerRequired: Value(customerRequired),
+        customerRequired: const Value(false),
         updatedAt: Value(DateTime.now()),
       ),
     );

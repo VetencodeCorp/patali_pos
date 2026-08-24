@@ -25,6 +25,8 @@ class ReceiptTextFormatter {
       _line(),
       receipt.order.orderNumber,
       _date(receipt.order.orderedAt),
+      if (receipt.customer != null)
+        _left('Pelanggan: ${receipt.customer!.name}'),
       _line(),
       for (final item in receipt.items) ...[
         _left(item.productName),
