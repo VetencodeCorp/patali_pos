@@ -7252,6 +7252,700 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   }
 }
 
+class $DeviceSettingsTable extends DeviceSettings
+    with TableInfo<$DeviceSettingsTable, DeviceSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DeviceSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _printerTypeMeta = const VerificationMeta(
+    'printerType',
+  );
+  @override
+  late final GeneratedColumn<String> printerType = GeneratedColumn<String>(
+    'printer_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('bluetooth'),
+  );
+  static const VerificationMeta _printerNameMeta = const VerificationMeta(
+    'printerName',
+  );
+  @override
+  late final GeneratedColumn<String> printerName = GeneratedColumn<String>(
+    'printer_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _printerAddressMeta = const VerificationMeta(
+    'printerAddress',
+  );
+  @override
+  late final GeneratedColumn<String> printerAddress = GeneratedColumn<String>(
+    'printer_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _printerIpMeta = const VerificationMeta(
+    'printerIp',
+  );
+  @override
+  late final GeneratedColumn<String> printerIp = GeneratedColumn<String>(
+    'printer_ip',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _printerPortMeta = const VerificationMeta(
+    'printerPort',
+  );
+  @override
+  late final GeneratedColumn<int> printerPort = GeneratedColumn<int>(
+    'printer_port',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(9100),
+  );
+  static const VerificationMeta _paperWidthMeta = const VerificationMeta(
+    'paperWidth',
+  );
+  @override
+  late final GeneratedColumn<int> paperWidth = GeneratedColumn<int>(
+    'paper_width',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(58),
+  );
+  static const VerificationMeta _cashDrawerEnabledMeta = const VerificationMeta(
+    'cashDrawerEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> cashDrawerEnabled = GeneratedColumn<bool>(
+    'cash_drawer_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("cash_drawer_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _barcodeScannerEnabledMeta =
+      const VerificationMeta('barcodeScannerEnabled');
+  @override
+  late final GeneratedColumn<bool> barcodeScannerEnabled =
+      GeneratedColumn<bool>(
+        'barcode_scanner_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("barcode_scanner_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    printerType,
+    printerName,
+    printerAddress,
+    printerIp,
+    printerPort,
+    paperWidth,
+    cashDrawerEnabled,
+    barcodeScannerEnabled,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'device_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DeviceSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('printer_type')) {
+      context.handle(
+        _printerTypeMeta,
+        printerType.isAcceptableOrUnknown(
+          data['printer_type']!,
+          _printerTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('printer_name')) {
+      context.handle(
+        _printerNameMeta,
+        printerName.isAcceptableOrUnknown(
+          data['printer_name']!,
+          _printerNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('printer_address')) {
+      context.handle(
+        _printerAddressMeta,
+        printerAddress.isAcceptableOrUnknown(
+          data['printer_address']!,
+          _printerAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('printer_ip')) {
+      context.handle(
+        _printerIpMeta,
+        printerIp.isAcceptableOrUnknown(data['printer_ip']!, _printerIpMeta),
+      );
+    }
+    if (data.containsKey('printer_port')) {
+      context.handle(
+        _printerPortMeta,
+        printerPort.isAcceptableOrUnknown(
+          data['printer_port']!,
+          _printerPortMeta,
+        ),
+      );
+    }
+    if (data.containsKey('paper_width')) {
+      context.handle(
+        _paperWidthMeta,
+        paperWidth.isAcceptableOrUnknown(data['paper_width']!, _paperWidthMeta),
+      );
+    }
+    if (data.containsKey('cash_drawer_enabled')) {
+      context.handle(
+        _cashDrawerEnabledMeta,
+        cashDrawerEnabled.isAcceptableOrUnknown(
+          data['cash_drawer_enabled']!,
+          _cashDrawerEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('barcode_scanner_enabled')) {
+      context.handle(
+        _barcodeScannerEnabledMeta,
+        barcodeScannerEnabled.isAcceptableOrUnknown(
+          data['barcode_scanner_enabled']!,
+          _barcodeScannerEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DeviceSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DeviceSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      printerType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}printer_type'],
+      )!,
+      printerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}printer_name'],
+      ),
+      printerAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}printer_address'],
+      ),
+      printerIp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}printer_ip'],
+      ),
+      printerPort: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}printer_port'],
+      )!,
+      paperWidth: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paper_width'],
+      )!,
+      cashDrawerEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}cash_drawer_enabled'],
+      )!,
+      barcodeScannerEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}barcode_scanner_enabled'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $DeviceSettingsTable createAlias(String alias) {
+    return $DeviceSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class DeviceSetting extends DataClass implements Insertable<DeviceSetting> {
+  final String id;
+  final String printerType;
+  final String? printerName;
+  final String? printerAddress;
+  final String? printerIp;
+  final int printerPort;
+  final int paperWidth;
+  final bool cashDrawerEnabled;
+  final bool barcodeScannerEnabled;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const DeviceSetting({
+    required this.id,
+    required this.printerType,
+    this.printerName,
+    this.printerAddress,
+    this.printerIp,
+    required this.printerPort,
+    required this.paperWidth,
+    required this.cashDrawerEnabled,
+    required this.barcodeScannerEnabled,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['printer_type'] = Variable<String>(printerType);
+    if (!nullToAbsent || printerName != null) {
+      map['printer_name'] = Variable<String>(printerName);
+    }
+    if (!nullToAbsent || printerAddress != null) {
+      map['printer_address'] = Variable<String>(printerAddress);
+    }
+    if (!nullToAbsent || printerIp != null) {
+      map['printer_ip'] = Variable<String>(printerIp);
+    }
+    map['printer_port'] = Variable<int>(printerPort);
+    map['paper_width'] = Variable<int>(paperWidth);
+    map['cash_drawer_enabled'] = Variable<bool>(cashDrawerEnabled);
+    map['barcode_scanner_enabled'] = Variable<bool>(barcodeScannerEnabled);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  DeviceSettingsCompanion toCompanion(bool nullToAbsent) {
+    return DeviceSettingsCompanion(
+      id: Value(id),
+      printerType: Value(printerType),
+      printerName: printerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(printerName),
+      printerAddress: printerAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(printerAddress),
+      printerIp: printerIp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(printerIp),
+      printerPort: Value(printerPort),
+      paperWidth: Value(paperWidth),
+      cashDrawerEnabled: Value(cashDrawerEnabled),
+      barcodeScannerEnabled: Value(barcodeScannerEnabled),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory DeviceSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DeviceSetting(
+      id: serializer.fromJson<String>(json['id']),
+      printerType: serializer.fromJson<String>(json['printerType']),
+      printerName: serializer.fromJson<String?>(json['printerName']),
+      printerAddress: serializer.fromJson<String?>(json['printerAddress']),
+      printerIp: serializer.fromJson<String?>(json['printerIp']),
+      printerPort: serializer.fromJson<int>(json['printerPort']),
+      paperWidth: serializer.fromJson<int>(json['paperWidth']),
+      cashDrawerEnabled: serializer.fromJson<bool>(json['cashDrawerEnabled']),
+      barcodeScannerEnabled: serializer.fromJson<bool>(
+        json['barcodeScannerEnabled'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'printerType': serializer.toJson<String>(printerType),
+      'printerName': serializer.toJson<String?>(printerName),
+      'printerAddress': serializer.toJson<String?>(printerAddress),
+      'printerIp': serializer.toJson<String?>(printerIp),
+      'printerPort': serializer.toJson<int>(printerPort),
+      'paperWidth': serializer.toJson<int>(paperWidth),
+      'cashDrawerEnabled': serializer.toJson<bool>(cashDrawerEnabled),
+      'barcodeScannerEnabled': serializer.toJson<bool>(barcodeScannerEnabled),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  DeviceSetting copyWith({
+    String? id,
+    String? printerType,
+    Value<String?> printerName = const Value.absent(),
+    Value<String?> printerAddress = const Value.absent(),
+    Value<String?> printerIp = const Value.absent(),
+    int? printerPort,
+    int? paperWidth,
+    bool? cashDrawerEnabled,
+    bool? barcodeScannerEnabled,
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => DeviceSetting(
+    id: id ?? this.id,
+    printerType: printerType ?? this.printerType,
+    printerName: printerName.present ? printerName.value : this.printerName,
+    printerAddress: printerAddress.present
+        ? printerAddress.value
+        : this.printerAddress,
+    printerIp: printerIp.present ? printerIp.value : this.printerIp,
+    printerPort: printerPort ?? this.printerPort,
+    paperWidth: paperWidth ?? this.paperWidth,
+    cashDrawerEnabled: cashDrawerEnabled ?? this.cashDrawerEnabled,
+    barcodeScannerEnabled: barcodeScannerEnabled ?? this.barcodeScannerEnabled,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  DeviceSetting copyWithCompanion(DeviceSettingsCompanion data) {
+    return DeviceSetting(
+      id: data.id.present ? data.id.value : this.id,
+      printerType: data.printerType.present
+          ? data.printerType.value
+          : this.printerType,
+      printerName: data.printerName.present
+          ? data.printerName.value
+          : this.printerName,
+      printerAddress: data.printerAddress.present
+          ? data.printerAddress.value
+          : this.printerAddress,
+      printerIp: data.printerIp.present ? data.printerIp.value : this.printerIp,
+      printerPort: data.printerPort.present
+          ? data.printerPort.value
+          : this.printerPort,
+      paperWidth: data.paperWidth.present
+          ? data.paperWidth.value
+          : this.paperWidth,
+      cashDrawerEnabled: data.cashDrawerEnabled.present
+          ? data.cashDrawerEnabled.value
+          : this.cashDrawerEnabled,
+      barcodeScannerEnabled: data.barcodeScannerEnabled.present
+          ? data.barcodeScannerEnabled.value
+          : this.barcodeScannerEnabled,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeviceSetting(')
+          ..write('id: $id, ')
+          ..write('printerType: $printerType, ')
+          ..write('printerName: $printerName, ')
+          ..write('printerAddress: $printerAddress, ')
+          ..write('printerIp: $printerIp, ')
+          ..write('printerPort: $printerPort, ')
+          ..write('paperWidth: $paperWidth, ')
+          ..write('cashDrawerEnabled: $cashDrawerEnabled, ')
+          ..write('barcodeScannerEnabled: $barcodeScannerEnabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    printerType,
+    printerName,
+    printerAddress,
+    printerIp,
+    printerPort,
+    paperWidth,
+    cashDrawerEnabled,
+    barcodeScannerEnabled,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DeviceSetting &&
+          other.id == this.id &&
+          other.printerType == this.printerType &&
+          other.printerName == this.printerName &&
+          other.printerAddress == this.printerAddress &&
+          other.printerIp == this.printerIp &&
+          other.printerPort == this.printerPort &&
+          other.paperWidth == this.paperWidth &&
+          other.cashDrawerEnabled == this.cashDrawerEnabled &&
+          other.barcodeScannerEnabled == this.barcodeScannerEnabled &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DeviceSettingsCompanion extends UpdateCompanion<DeviceSetting> {
+  final Value<String> id;
+  final Value<String> printerType;
+  final Value<String?> printerName;
+  final Value<String?> printerAddress;
+  final Value<String?> printerIp;
+  final Value<int> printerPort;
+  final Value<int> paperWidth;
+  final Value<bool> cashDrawerEnabled;
+  final Value<bool> barcodeScannerEnabled;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const DeviceSettingsCompanion({
+    this.id = const Value.absent(),
+    this.printerType = const Value.absent(),
+    this.printerName = const Value.absent(),
+    this.printerAddress = const Value.absent(),
+    this.printerIp = const Value.absent(),
+    this.printerPort = const Value.absent(),
+    this.paperWidth = const Value.absent(),
+    this.cashDrawerEnabled = const Value.absent(),
+    this.barcodeScannerEnabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DeviceSettingsCompanion.insert({
+    required String id,
+    this.printerType = const Value.absent(),
+    this.printerName = const Value.absent(),
+    this.printerAddress = const Value.absent(),
+    this.printerIp = const Value.absent(),
+    this.printerPort = const Value.absent(),
+    this.paperWidth = const Value.absent(),
+    this.cashDrawerEnabled = const Value.absent(),
+    this.barcodeScannerEnabled = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<DeviceSetting> custom({
+    Expression<String>? id,
+    Expression<String>? printerType,
+    Expression<String>? printerName,
+    Expression<String>? printerAddress,
+    Expression<String>? printerIp,
+    Expression<int>? printerPort,
+    Expression<int>? paperWidth,
+    Expression<bool>? cashDrawerEnabled,
+    Expression<bool>? barcodeScannerEnabled,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (printerType != null) 'printer_type': printerType,
+      if (printerName != null) 'printer_name': printerName,
+      if (printerAddress != null) 'printer_address': printerAddress,
+      if (printerIp != null) 'printer_ip': printerIp,
+      if (printerPort != null) 'printer_port': printerPort,
+      if (paperWidth != null) 'paper_width': paperWidth,
+      if (cashDrawerEnabled != null) 'cash_drawer_enabled': cashDrawerEnabled,
+      if (barcodeScannerEnabled != null)
+        'barcode_scanner_enabled': barcodeScannerEnabled,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DeviceSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? printerType,
+    Value<String?>? printerName,
+    Value<String?>? printerAddress,
+    Value<String?>? printerIp,
+    Value<int>? printerPort,
+    Value<int>? paperWidth,
+    Value<bool>? cashDrawerEnabled,
+    Value<bool>? barcodeScannerEnabled,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return DeviceSettingsCompanion(
+      id: id ?? this.id,
+      printerType: printerType ?? this.printerType,
+      printerName: printerName ?? this.printerName,
+      printerAddress: printerAddress ?? this.printerAddress,
+      printerIp: printerIp ?? this.printerIp,
+      printerPort: printerPort ?? this.printerPort,
+      paperWidth: paperWidth ?? this.paperWidth,
+      cashDrawerEnabled: cashDrawerEnabled ?? this.cashDrawerEnabled,
+      barcodeScannerEnabled:
+          barcodeScannerEnabled ?? this.barcodeScannerEnabled,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (printerType.present) {
+      map['printer_type'] = Variable<String>(printerType.value);
+    }
+    if (printerName.present) {
+      map['printer_name'] = Variable<String>(printerName.value);
+    }
+    if (printerAddress.present) {
+      map['printer_address'] = Variable<String>(printerAddress.value);
+    }
+    if (printerIp.present) {
+      map['printer_ip'] = Variable<String>(printerIp.value);
+    }
+    if (printerPort.present) {
+      map['printer_port'] = Variable<int>(printerPort.value);
+    }
+    if (paperWidth.present) {
+      map['paper_width'] = Variable<int>(paperWidth.value);
+    }
+    if (cashDrawerEnabled.present) {
+      map['cash_drawer_enabled'] = Variable<bool>(cashDrawerEnabled.value);
+    }
+    if (barcodeScannerEnabled.present) {
+      map['barcode_scanner_enabled'] = Variable<bool>(
+        barcodeScannerEnabled.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeviceSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('printerType: $printerType, ')
+          ..write('printerName: $printerName, ')
+          ..write('printerAddress: $printerAddress, ')
+          ..write('printerIp: $printerIp, ')
+          ..write('printerPort: $printerPort, ')
+          ..write('paperWidth: $paperWidth, ')
+          ..write('cashDrawerEnabled: $cashDrawerEnabled, ')
+          ..write('barcodeScannerEnabled: $barcodeScannerEnabled, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7269,6 +7963,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PaymentsTable payments = $PaymentsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $DeviceSettingsTable deviceSettings = $DeviceSettingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7286,6 +7981,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     payments,
     syncQueue,
     appSettings,
+    deviceSettings,
   ];
 }
 
@@ -13066,6 +13762,336 @@ typedef $$AppSettingsTableProcessedTableManager =
       AppSetting,
       PrefetchHooks Function()
     >;
+typedef $$DeviceSettingsTableCreateCompanionBuilder =
+    DeviceSettingsCompanion Function({
+      required String id,
+      Value<String> printerType,
+      Value<String?> printerName,
+      Value<String?> printerAddress,
+      Value<String?> printerIp,
+      Value<int> printerPort,
+      Value<int> paperWidth,
+      Value<bool> cashDrawerEnabled,
+      Value<bool> barcodeScannerEnabled,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$DeviceSettingsTableUpdateCompanionBuilder =
+    DeviceSettingsCompanion Function({
+      Value<String> id,
+      Value<String> printerType,
+      Value<String?> printerName,
+      Value<String?> printerAddress,
+      Value<String?> printerIp,
+      Value<int> printerPort,
+      Value<int> paperWidth,
+      Value<bool> cashDrawerEnabled,
+      Value<bool> barcodeScannerEnabled,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$DeviceSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $DeviceSettingsTable> {
+  $$DeviceSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get printerType => $composableBuilder(
+    column: $table.printerType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get printerName => $composableBuilder(
+    column: $table.printerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get printerAddress => $composableBuilder(
+    column: $table.printerAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get printerIp => $composableBuilder(
+    column: $table.printerIp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get printerPort => $composableBuilder(
+    column: $table.printerPort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get paperWidth => $composableBuilder(
+    column: $table.paperWidth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get cashDrawerEnabled => $composableBuilder(
+    column: $table.cashDrawerEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get barcodeScannerEnabled => $composableBuilder(
+    column: $table.barcodeScannerEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DeviceSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DeviceSettingsTable> {
+  $$DeviceSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get printerType => $composableBuilder(
+    column: $table.printerType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get printerName => $composableBuilder(
+    column: $table.printerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get printerAddress => $composableBuilder(
+    column: $table.printerAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get printerIp => $composableBuilder(
+    column: $table.printerIp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get printerPort => $composableBuilder(
+    column: $table.printerPort,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get paperWidth => $composableBuilder(
+    column: $table.paperWidth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get cashDrawerEnabled => $composableBuilder(
+    column: $table.cashDrawerEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get barcodeScannerEnabled => $composableBuilder(
+    column: $table.barcodeScannerEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DeviceSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DeviceSettingsTable> {
+  $$DeviceSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get printerType => $composableBuilder(
+    column: $table.printerType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get printerName => $composableBuilder(
+    column: $table.printerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get printerAddress => $composableBuilder(
+    column: $table.printerAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get printerIp =>
+      $composableBuilder(column: $table.printerIp, builder: (column) => column);
+
+  GeneratedColumn<int> get printerPort => $composableBuilder(
+    column: $table.printerPort,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get paperWidth => $composableBuilder(
+    column: $table.paperWidth,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get cashDrawerEnabled => $composableBuilder(
+    column: $table.cashDrawerEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get barcodeScannerEnabled => $composableBuilder(
+    column: $table.barcodeScannerEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$DeviceSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DeviceSettingsTable,
+          DeviceSetting,
+          $$DeviceSettingsTableFilterComposer,
+          $$DeviceSettingsTableOrderingComposer,
+          $$DeviceSettingsTableAnnotationComposer,
+          $$DeviceSettingsTableCreateCompanionBuilder,
+          $$DeviceSettingsTableUpdateCompanionBuilder,
+          (
+            DeviceSetting,
+            BaseReferences<_$AppDatabase, $DeviceSettingsTable, DeviceSetting>,
+          ),
+          DeviceSetting,
+          PrefetchHooks Function()
+        > {
+  $$DeviceSettingsTableTableManager(
+    _$AppDatabase db,
+    $DeviceSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DeviceSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DeviceSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DeviceSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> printerType = const Value.absent(),
+                Value<String?> printerName = const Value.absent(),
+                Value<String?> printerAddress = const Value.absent(),
+                Value<String?> printerIp = const Value.absent(),
+                Value<int> printerPort = const Value.absent(),
+                Value<int> paperWidth = const Value.absent(),
+                Value<bool> cashDrawerEnabled = const Value.absent(),
+                Value<bool> barcodeScannerEnabled = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DeviceSettingsCompanion(
+                id: id,
+                printerType: printerType,
+                printerName: printerName,
+                printerAddress: printerAddress,
+                printerIp: printerIp,
+                printerPort: printerPort,
+                paperWidth: paperWidth,
+                cashDrawerEnabled: cashDrawerEnabled,
+                barcodeScannerEnabled: barcodeScannerEnabled,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> printerType = const Value.absent(),
+                Value<String?> printerName = const Value.absent(),
+                Value<String?> printerAddress = const Value.absent(),
+                Value<String?> printerIp = const Value.absent(),
+                Value<int> printerPort = const Value.absent(),
+                Value<int> paperWidth = const Value.absent(),
+                Value<bool> cashDrawerEnabled = const Value.absent(),
+                Value<bool> barcodeScannerEnabled = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DeviceSettingsCompanion.insert(
+                id: id,
+                printerType: printerType,
+                printerName: printerName,
+                printerAddress: printerAddress,
+                printerIp: printerIp,
+                printerPort: printerPort,
+                paperWidth: paperWidth,
+                cashDrawerEnabled: cashDrawerEnabled,
+                barcodeScannerEnabled: barcodeScannerEnabled,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DeviceSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DeviceSettingsTable,
+      DeviceSetting,
+      $$DeviceSettingsTableFilterComposer,
+      $$DeviceSettingsTableOrderingComposer,
+      $$DeviceSettingsTableAnnotationComposer,
+      $$DeviceSettingsTableCreateCompanionBuilder,
+      $$DeviceSettingsTableUpdateCompanionBuilder,
+      (
+        DeviceSetting,
+        BaseReferences<_$AppDatabase, $DeviceSettingsTable, DeviceSetting>,
+      ),
+      DeviceSetting,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13094,4 +14120,6 @@ class $AppDatabaseManager {
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$DeviceSettingsTableTableManager get deviceSettings =>
+      $$DeviceSettingsTableTableManager(_db, _db.deviceSettings);
 }

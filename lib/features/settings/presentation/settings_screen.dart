@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/patali_card.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import 'device_settings_screen.dart';
 import 'product_management_screen.dart';
 import 'receipt_tax_settings_screen.dart';
 
@@ -45,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.print_outlined,
             title: 'Perangkat',
             subtitle: 'Printer Bluetooth/LAN, cash drawer, scanner',
-            onTap: () {},
+            onTap: () => context.push(DeviceSettingsScreen.routePath),
           ),
           _SettingEntry(
             icon: Icons.credit_card,

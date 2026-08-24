@@ -204,6 +204,26 @@ class AppSettings extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class DeviceSettings extends Table {
+  TextColumn get id => text()();
+  TextColumn get printerType =>
+      text().withDefault(const Constant('bluetooth'))();
+  TextColumn get printerName => text().nullable()();
+  TextColumn get printerAddress => text().nullable()();
+  TextColumn get printerIp => text().nullable()();
+  IntColumn get printerPort => integer().withDefault(const Constant(9100))();
+  IntColumn get paperWidth => integer().withDefault(const Constant(58))();
+  BoolColumn get cashDrawerEnabled =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get barcodeScannerEnabled =>
+      boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Categories,
@@ -218,6 +238,7 @@ class AppSettings extends Table {
     Payments,
     SyncQueue,
     AppSettings,
+    DeviceSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -226,7 +247,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -236,6 +257,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await migrator.createTable(appSettings);
+      }
+      if (from < 4) {
+        await migrator.createTable(deviceSettings);
       }
     },
   );
