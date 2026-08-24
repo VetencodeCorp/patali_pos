@@ -47,12 +47,21 @@ class ProductRepository {
     return query.watch();
   }
 
+  Future<Product?> getProductById(String id) {
+    return (_database.select(
+      _database.products,
+    )..where((product) => product.id.equals(id))).getSingleOrNull();
+  }
+
   Future<Product> createProduct({
     required String name,
     required int price,
     String? sku,
     String? barcode,
+    String? description,
+    String? imagePath,
     String? categoryId,
+    int? cost,
     bool trackStock = false,
     int stockQty = 0,
   }) async {
@@ -61,6 +70,13 @@ class ProductRepository {
     }
     if (price < 0) {
       throw ArgumentError.value(price, 'price', 'Harga tidak boleh negatif');
+    }
+    if (cost != null && cost < 0) {
+      throw ArgumentError.value(
+        cost,
+        'cost',
+        'Harga modal tidak boleh negatif',
+      );
     }
     if (stockQty < 0) {
       throw ArgumentError.value(
@@ -82,7 +98,14 @@ class ProductRepository {
               barcode?.trim().isEmpty ?? true ? null : barcode!.trim(),
             ),
             name: name.trim(),
+            description: Value(
+              description?.trim().isEmpty ?? true ? null : description!.trim(),
+            ),
+            imagePath: Value(
+              imagePath?.trim().isEmpty ?? true ? null : imagePath!.trim(),
+            ),
             price: price,
+            cost: Value(cost),
             trackStock: Value(trackStock),
             stockQty: Value(trackStock ? stockQty : 0),
           ),
@@ -99,7 +122,10 @@ class ProductRepository {
     required int price,
     String? sku,
     String? barcode,
+    String? description,
+    String? imagePath,
     String? categoryId,
+    int? cost,
     bool trackStock = false,
     int stockQty = 0,
   }) async {
@@ -108,6 +134,13 @@ class ProductRepository {
     }
     if (price < 0) {
       throw ArgumentError.value(price, 'price', 'Harga tidak boleh negatif');
+    }
+    if (cost != null && cost < 0) {
+      throw ArgumentError.value(
+        cost,
+        'cost',
+        'Harga modal tidak boleh negatif',
+      );
     }
     if (stockQty < 0) {
       throw ArgumentError.value(
@@ -127,7 +160,14 @@ class ProductRepository {
           barcode?.trim().isEmpty ?? true ? null : barcode!.trim(),
         ),
         name: Value(name.trim()),
+        description: Value(
+          description?.trim().isEmpty ?? true ? null : description!.trim(),
+        ),
+        imagePath: Value(
+          imagePath?.trim().isEmpty ?? true ? null : imagePath!.trim(),
+        ),
         price: Value(price),
+        cost: Value(cost),
         trackStock: Value(trackStock),
         stockQty: Value(trackStock ? stockQty : 0),
         updatedAt: Value(DateTime.now()),

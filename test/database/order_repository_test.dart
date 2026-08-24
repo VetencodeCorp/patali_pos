@@ -64,6 +64,29 @@ void main() {
     expect(history.single.payment?.method, 'qris');
   });
 
+  test('stores selected order type', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+
+    final order = await orders.createCashOrder(
+      cashSessionId: session.id,
+      orderType: 'Meja',
+      subtotal: 18000,
+      discountTotal: 0,
+      grandTotal: 18000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 18000,
+          lineTotal: 18000,
+        ),
+      ],
+    );
+
+    expect(order.orderType, 'Meja');
+  });
+
   test('voids completed order and payment', () async {
     final session = await cashSessions.openSession(openingCash: 0);
     final order = await orders.createCashOrder(

@@ -1,11 +1,14 @@
 import 'dart:ui';
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../data/database/app_database.dart';
+import '../../../data/repositories/app_settings_repository.dart';
 import '../../../data/repositories/cash_session_repository.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/product_repository.dart';
@@ -419,17 +422,30 @@ class _ProductGrid extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 42,
+                      height: 42,
                       color: _mint,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.restaurant_menu,
-                      color: _brand,
-                      size: 19,
+                      child:
+                          product.imagePath == null ||
+                              product.imagePath!.isEmpty
+                          ? const Icon(
+                              Icons.restaurant_menu,
+                              color: _brand,
+                              size: 19,
+                            )
+                          : Image.file(
+                              File(product.imagePath!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.restaurant_menu,
+                                    color: _brand,
+                                    size: 19,
+                                  ),
+                            ),
                     ),
                   ),
                   const Spacer(),
@@ -482,12 +498,13 @@ class _MobilePosActionBar extends ConsumerWidget {
     final cartItems = ref.watch(cartControllerProvider);
     final orderType = ref.watch(selectedOrderTypeProvider);
     final discount = ref.watch(cartDiscountProvider);
+    final settings = ref.watch(appSettingsProvider).valueOrNull;
     final currency = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    final total = cartItems.grandTotal(discount);
+    final total = _calculateCartTotal(cartItems, discount, settings);
 
     return SafeArea(
       top: false,
@@ -704,6 +721,7 @@ class _CartPanel extends ConsumerWidget {
     final paymentMethod = ref.watch(selectedPaymentMethodProvider);
     final checkoutState = ref.watch(checkoutControllerProvider);
     final cashSession = ref.watch(activeCashSessionProvider).valueOrNull;
+    final settings = ref.watch(appSettingsProvider).valueOrNull;
     final currency = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -711,7 +729,14 @@ class _CartPanel extends ConsumerWidget {
     );
     final subtotal = cartItems.subtotal;
     final safeDiscount = discountTotal.clamp(0, subtotal);
-    final grandTotal = cartItems.grandTotal(safeDiscount);
+    final taxableAmount = subtotal - safeDiscount;
+    final taxTotal = settings?.taxEnabled ?? false
+        ? (taxableAmount * settings!.taxRate / 100).round()
+        : 0;
+    final serviceTotal = settings?.serviceEnabled ?? false
+        ? (taxableAmount * settings!.serviceRate / 100).round()
+        : 0;
+    final grandTotal = taxableAmount + taxTotal + serviceTotal;
 
     if (!wide && cartItems.isEmpty) {
       return Padding(
@@ -832,6 +857,20 @@ class _CartPanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
+          if (taxTotal > 0) ...[
+            _CartAmountRow(
+              label: 'Pajak (${settings!.taxRate}%)',
+              value: currency.format(taxTotal),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (serviceTotal > 0) ...[
+            _CartAmountRow(
+              label: 'Service (${settings!.serviceRate}%)',
+              value: currency.format(serviceTotal),
+            ),
+            const SizedBox(height: 8),
+          ],
           _CartAmountRow(
             label: 'Total',
             value: currency.format(grandTotal),
@@ -937,6 +976,23 @@ String _paymentMethodLabel(String method) {
     'transfer' => 'transfer',
     _ => method,
   };
+}
+
+int _calculateCartTotal(
+  List<CartItem> items,
+  int discount,
+  AppSetting? settings,
+) {
+  final subtotal = items.subtotal;
+  final safeDiscount = discount.clamp(0, subtotal);
+  final taxableAmount = subtotal - safeDiscount;
+  final taxTotal = settings?.taxEnabled ?? false
+      ? (taxableAmount * settings!.taxRate / 100).round()
+      : 0;
+  final serviceTotal = settings?.serviceEnabled ?? false
+      ? (taxableAmount * settings!.serviceRate / 100).round()
+      : 0;
+  return taxableAmount + taxTotal + serviceTotal;
 }
 
 class _PaymentMethodSelector extends ConsumerWidget {

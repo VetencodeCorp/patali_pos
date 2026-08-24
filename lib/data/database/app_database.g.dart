@@ -532,6 +532,17 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _priceMeta = const VerificationMeta('price');
   @override
   late final GeneratedColumn<int> price = GeneratedColumn<int>(
@@ -634,6 +645,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     barcode,
     name,
     description,
+    imagePath,
     price,
     cost,
     trackStock,
@@ -693,6 +705,12 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
           data['description']!,
           _descriptionMeta,
         ),
+      );
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
       );
     }
     if (data.containsKey('price')) {
@@ -778,6 +796,10 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       price: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}price'],
@@ -826,6 +848,7 @@ class Product extends DataClass implements Insertable<Product> {
   final String? barcode;
   final String name;
   final String? description;
+  final String? imagePath;
   final int price;
   final int? cost;
   final bool trackStock;
@@ -841,6 +864,7 @@ class Product extends DataClass implements Insertable<Product> {
     this.barcode,
     required this.name,
     this.description,
+    this.imagePath,
     required this.price,
     this.cost,
     required this.trackStock,
@@ -866,6 +890,9 @@ class Product extends DataClass implements Insertable<Product> {
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
     }
     map['price'] = Variable<int>(price);
     if (!nullToAbsent || cost != null) {
@@ -898,6 +925,9 @@ class Product extends DataClass implements Insertable<Product> {
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       price: Value(price),
       cost: cost == null && nullToAbsent ? const Value.absent() : Value(cost),
       trackStock: Value(trackStock),
@@ -925,6 +955,7 @@ class Product extends DataClass implements Insertable<Product> {
       barcode: serializer.fromJson<String?>(json['barcode']),
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       price: serializer.fromJson<int>(json['price']),
       cost: serializer.fromJson<int?>(json['cost']),
       trackStock: serializer.fromJson<bool>(json['trackStock']),
@@ -945,6 +976,7 @@ class Product extends DataClass implements Insertable<Product> {
       'barcode': serializer.toJson<String?>(barcode),
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'price': serializer.toJson<int>(price),
       'cost': serializer.toJson<int?>(cost),
       'trackStock': serializer.toJson<bool>(trackStock),
@@ -963,6 +995,7 @@ class Product extends DataClass implements Insertable<Product> {
     Value<String?> barcode = const Value.absent(),
     String? name,
     Value<String?> description = const Value.absent(),
+    Value<String?> imagePath = const Value.absent(),
     int? price,
     Value<int?> cost = const Value.absent(),
     bool? trackStock,
@@ -978,6 +1011,7 @@ class Product extends DataClass implements Insertable<Product> {
     barcode: barcode.present ? barcode.value : this.barcode,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     price: price ?? this.price,
     cost: cost.present ? cost.value : this.cost,
     trackStock: trackStock ?? this.trackStock,
@@ -999,6 +1033,7 @@ class Product extends DataClass implements Insertable<Product> {
       description: data.description.present
           ? data.description.value
           : this.description,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       price: data.price.present ? data.price.value : this.price,
       cost: data.cost.present ? data.cost.value : this.cost,
       trackStock: data.trackStock.present
@@ -1021,6 +1056,7 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('barcode: $barcode, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('imagePath: $imagePath, ')
           ..write('price: $price, ')
           ..write('cost: $cost, ')
           ..write('trackStock: $trackStock, ')
@@ -1041,6 +1077,7 @@ class Product extends DataClass implements Insertable<Product> {
     barcode,
     name,
     description,
+    imagePath,
     price,
     cost,
     trackStock,
@@ -1060,6 +1097,7 @@ class Product extends DataClass implements Insertable<Product> {
           other.barcode == this.barcode &&
           other.name == this.name &&
           other.description == this.description &&
+          other.imagePath == this.imagePath &&
           other.price == this.price &&
           other.cost == this.cost &&
           other.trackStock == this.trackStock &&
@@ -1077,6 +1115,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String?> barcode;
   final Value<String> name;
   final Value<String?> description;
+  final Value<String?> imagePath;
   final Value<int> price;
   final Value<int?> cost;
   final Value<bool> trackStock;
@@ -1093,6 +1132,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.barcode = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.price = const Value.absent(),
     this.cost = const Value.absent(),
     this.trackStock = const Value.absent(),
@@ -1110,6 +1150,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.barcode = const Value.absent(),
     required String name,
     this.description = const Value.absent(),
+    this.imagePath = const Value.absent(),
     required int price,
     this.cost = const Value.absent(),
     this.trackStock = const Value.absent(),
@@ -1129,6 +1170,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<String>? barcode,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<String>? imagePath,
     Expression<int>? price,
     Expression<int>? cost,
     Expression<bool>? trackStock,
@@ -1146,6 +1188,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (barcode != null) 'barcode': barcode,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (imagePath != null) 'image_path': imagePath,
       if (price != null) 'price': price,
       if (cost != null) 'cost': cost,
       if (trackStock != null) 'track_stock': trackStock,
@@ -1165,6 +1208,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String?>? barcode,
     Value<String>? name,
     Value<String?>? description,
+    Value<String?>? imagePath,
     Value<int>? price,
     Value<int?>? cost,
     Value<bool>? trackStock,
@@ -1182,6 +1226,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       barcode: barcode ?? this.barcode,
       name: name ?? this.name,
       description: description ?? this.description,
+      imagePath: imagePath ?? this.imagePath,
       price: price ?? this.price,
       cost: cost ?? this.cost,
       trackStock: trackStock ?? this.trackStock,
@@ -1214,6 +1259,9 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
     }
     if (price.present) {
       map['price'] = Variable<int>(price.value);
@@ -1254,6 +1302,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('barcode: $barcode, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
+          ..write('imagePath: $imagePath, ')
           ..write('price: $price, ')
           ..write('cost: $cost, ')
           ..write('trackStock: $trackStock, ')
@@ -6411,6 +6460,798 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   }
 }
 
+class $AppSettingsTable extends AppSettings
+    with TableInfo<$AppSettingsTable, AppSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AppSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _outletNameMeta = const VerificationMeta(
+    'outletName',
+  );
+  @override
+  late final GeneratedColumn<String> outletName = GeneratedColumn<String>(
+    'outlet_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Patali Demo Outlet'),
+  );
+  static const VerificationMeta _outletAddressMeta = const VerificationMeta(
+    'outletAddress',
+  );
+  @override
+  late final GeneratedColumn<String> outletAddress = GeneratedColumn<String>(
+    'outlet_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outletPhoneMeta = const VerificationMeta(
+    'outletPhone',
+  );
+  @override
+  late final GeneratedColumn<String> outletPhone = GeneratedColumn<String>(
+    'outlet_phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _receiptHeaderMeta = const VerificationMeta(
+    'receiptHeader',
+  );
+  @override
+  late final GeneratedColumn<String> receiptHeader = GeneratedColumn<String>(
+    'receipt_header',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _receiptFooterMeta = const VerificationMeta(
+    'receiptFooter',
+  );
+  @override
+  late final GeneratedColumn<String> receiptFooter = GeneratedColumn<String>(
+    'receipt_footer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Terima kasih'),
+  );
+  static const VerificationMeta _taxEnabledMeta = const VerificationMeta(
+    'taxEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> taxEnabled = GeneratedColumn<bool>(
+    'tax_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tax_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _taxRateMeta = const VerificationMeta(
+    'taxRate',
+  );
+  @override
+  late final GeneratedColumn<int> taxRate = GeneratedColumn<int>(
+    'tax_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _serviceEnabledMeta = const VerificationMeta(
+    'serviceEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> serviceEnabled = GeneratedColumn<bool>(
+    'service_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("service_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _serviceRateMeta = const VerificationMeta(
+    'serviceRate',
+  );
+  @override
+  late final GeneratedColumn<int> serviceRate = GeneratedColumn<int>(
+    'service_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _showOutletAddressMeta = const VerificationMeta(
+    'showOutletAddress',
+  );
+  @override
+  late final GeneratedColumn<bool> showOutletAddress = GeneratedColumn<bool>(
+    'show_outlet_address',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("show_outlet_address" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    outletName,
+    outletAddress,
+    outletPhone,
+    receiptHeader,
+    receiptFooter,
+    taxEnabled,
+    taxRate,
+    serviceEnabled,
+    serviceRate,
+    showOutletAddress,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'app_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AppSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('outlet_name')) {
+      context.handle(
+        _outletNameMeta,
+        outletName.isAcceptableOrUnknown(data['outlet_name']!, _outletNameMeta),
+      );
+    }
+    if (data.containsKey('outlet_address')) {
+      context.handle(
+        _outletAddressMeta,
+        outletAddress.isAcceptableOrUnknown(
+          data['outlet_address']!,
+          _outletAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('outlet_phone')) {
+      context.handle(
+        _outletPhoneMeta,
+        outletPhone.isAcceptableOrUnknown(
+          data['outlet_phone']!,
+          _outletPhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('receipt_header')) {
+      context.handle(
+        _receiptHeaderMeta,
+        receiptHeader.isAcceptableOrUnknown(
+          data['receipt_header']!,
+          _receiptHeaderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('receipt_footer')) {
+      context.handle(
+        _receiptFooterMeta,
+        receiptFooter.isAcceptableOrUnknown(
+          data['receipt_footer']!,
+          _receiptFooterMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tax_enabled')) {
+      context.handle(
+        _taxEnabledMeta,
+        taxEnabled.isAcceptableOrUnknown(data['tax_enabled']!, _taxEnabledMeta),
+      );
+    }
+    if (data.containsKey('tax_rate')) {
+      context.handle(
+        _taxRateMeta,
+        taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta),
+      );
+    }
+    if (data.containsKey('service_enabled')) {
+      context.handle(
+        _serviceEnabledMeta,
+        serviceEnabled.isAcceptableOrUnknown(
+          data['service_enabled']!,
+          _serviceEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_rate')) {
+      context.handle(
+        _serviceRateMeta,
+        serviceRate.isAcceptableOrUnknown(
+          data['service_rate']!,
+          _serviceRateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('show_outlet_address')) {
+      context.handle(
+        _showOutletAddressMeta,
+        showOutletAddress.isAcceptableOrUnknown(
+          data['show_outlet_address']!,
+          _showOutletAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AppSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      outletName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outlet_name'],
+      )!,
+      outletAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outlet_address'],
+      ),
+      outletPhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outlet_phone'],
+      ),
+      receiptHeader: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}receipt_header'],
+      ),
+      receiptFooter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}receipt_footer'],
+      )!,
+      taxEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tax_enabled'],
+      )!,
+      taxRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tax_rate'],
+      )!,
+      serviceEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}service_enabled'],
+      )!,
+      serviceRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}service_rate'],
+      )!,
+      showOutletAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}show_outlet_address'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $AppSettingsTable createAlias(String alias) {
+    return $AppSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class AppSetting extends DataClass implements Insertable<AppSetting> {
+  final String id;
+  final String outletName;
+  final String? outletAddress;
+  final String? outletPhone;
+  final String? receiptHeader;
+  final String receiptFooter;
+  final bool taxEnabled;
+  final int taxRate;
+  final bool serviceEnabled;
+  final int serviceRate;
+  final bool showOutletAddress;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  const AppSetting({
+    required this.id,
+    required this.outletName,
+    this.outletAddress,
+    this.outletPhone,
+    this.receiptHeader,
+    required this.receiptFooter,
+    required this.taxEnabled,
+    required this.taxRate,
+    required this.serviceEnabled,
+    required this.serviceRate,
+    required this.showOutletAddress,
+    required this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['outlet_name'] = Variable<String>(outletName);
+    if (!nullToAbsent || outletAddress != null) {
+      map['outlet_address'] = Variable<String>(outletAddress);
+    }
+    if (!nullToAbsent || outletPhone != null) {
+      map['outlet_phone'] = Variable<String>(outletPhone);
+    }
+    if (!nullToAbsent || receiptHeader != null) {
+      map['receipt_header'] = Variable<String>(receiptHeader);
+    }
+    map['receipt_footer'] = Variable<String>(receiptFooter);
+    map['tax_enabled'] = Variable<bool>(taxEnabled);
+    map['tax_rate'] = Variable<int>(taxRate);
+    map['service_enabled'] = Variable<bool>(serviceEnabled);
+    map['service_rate'] = Variable<int>(serviceRate);
+    map['show_outlet_address'] = Variable<bool>(showOutletAddress);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  AppSettingsCompanion toCompanion(bool nullToAbsent) {
+    return AppSettingsCompanion(
+      id: Value(id),
+      outletName: Value(outletName),
+      outletAddress: outletAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outletAddress),
+      outletPhone: outletPhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outletPhone),
+      receiptHeader: receiptHeader == null && nullToAbsent
+          ? const Value.absent()
+          : Value(receiptHeader),
+      receiptFooter: Value(receiptFooter),
+      taxEnabled: Value(taxEnabled),
+      taxRate: Value(taxRate),
+      serviceEnabled: Value(serviceEnabled),
+      serviceRate: Value(serviceRate),
+      showOutletAddress: Value(showOutletAddress),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory AppSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppSetting(
+      id: serializer.fromJson<String>(json['id']),
+      outletName: serializer.fromJson<String>(json['outletName']),
+      outletAddress: serializer.fromJson<String?>(json['outletAddress']),
+      outletPhone: serializer.fromJson<String?>(json['outletPhone']),
+      receiptHeader: serializer.fromJson<String?>(json['receiptHeader']),
+      receiptFooter: serializer.fromJson<String>(json['receiptFooter']),
+      taxEnabled: serializer.fromJson<bool>(json['taxEnabled']),
+      taxRate: serializer.fromJson<int>(json['taxRate']),
+      serviceEnabled: serializer.fromJson<bool>(json['serviceEnabled']),
+      serviceRate: serializer.fromJson<int>(json['serviceRate']),
+      showOutletAddress: serializer.fromJson<bool>(json['showOutletAddress']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'outletName': serializer.toJson<String>(outletName),
+      'outletAddress': serializer.toJson<String?>(outletAddress),
+      'outletPhone': serializer.toJson<String?>(outletPhone),
+      'receiptHeader': serializer.toJson<String?>(receiptHeader),
+      'receiptFooter': serializer.toJson<String>(receiptFooter),
+      'taxEnabled': serializer.toJson<bool>(taxEnabled),
+      'taxRate': serializer.toJson<int>(taxRate),
+      'serviceEnabled': serializer.toJson<bool>(serviceEnabled),
+      'serviceRate': serializer.toJson<int>(serviceRate),
+      'showOutletAddress': serializer.toJson<bool>(showOutletAddress),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  AppSetting copyWith({
+    String? id,
+    String? outletName,
+    Value<String?> outletAddress = const Value.absent(),
+    Value<String?> outletPhone = const Value.absent(),
+    Value<String?> receiptHeader = const Value.absent(),
+    String? receiptFooter,
+    bool? taxEnabled,
+    int? taxRate,
+    bool? serviceEnabled,
+    int? serviceRate,
+    bool? showOutletAddress,
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => AppSetting(
+    id: id ?? this.id,
+    outletName: outletName ?? this.outletName,
+    outletAddress: outletAddress.present
+        ? outletAddress.value
+        : this.outletAddress,
+    outletPhone: outletPhone.present ? outletPhone.value : this.outletPhone,
+    receiptHeader: receiptHeader.present
+        ? receiptHeader.value
+        : this.receiptHeader,
+    receiptFooter: receiptFooter ?? this.receiptFooter,
+    taxEnabled: taxEnabled ?? this.taxEnabled,
+    taxRate: taxRate ?? this.taxRate,
+    serviceEnabled: serviceEnabled ?? this.serviceEnabled,
+    serviceRate: serviceRate ?? this.serviceRate,
+    showOutletAddress: showOutletAddress ?? this.showOutletAddress,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  AppSetting copyWithCompanion(AppSettingsCompanion data) {
+    return AppSetting(
+      id: data.id.present ? data.id.value : this.id,
+      outletName: data.outletName.present
+          ? data.outletName.value
+          : this.outletName,
+      outletAddress: data.outletAddress.present
+          ? data.outletAddress.value
+          : this.outletAddress,
+      outletPhone: data.outletPhone.present
+          ? data.outletPhone.value
+          : this.outletPhone,
+      receiptHeader: data.receiptHeader.present
+          ? data.receiptHeader.value
+          : this.receiptHeader,
+      receiptFooter: data.receiptFooter.present
+          ? data.receiptFooter.value
+          : this.receiptFooter,
+      taxEnabled: data.taxEnabled.present
+          ? data.taxEnabled.value
+          : this.taxEnabled,
+      taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
+      serviceEnabled: data.serviceEnabled.present
+          ? data.serviceEnabled.value
+          : this.serviceEnabled,
+      serviceRate: data.serviceRate.present
+          ? data.serviceRate.value
+          : this.serviceRate,
+      showOutletAddress: data.showOutletAddress.present
+          ? data.showOutletAddress.value
+          : this.showOutletAddress,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppSetting(')
+          ..write('id: $id, ')
+          ..write('outletName: $outletName, ')
+          ..write('outletAddress: $outletAddress, ')
+          ..write('outletPhone: $outletPhone, ')
+          ..write('receiptHeader: $receiptHeader, ')
+          ..write('receiptFooter: $receiptFooter, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('serviceEnabled: $serviceEnabled, ')
+          ..write('serviceRate: $serviceRate, ')
+          ..write('showOutletAddress: $showOutletAddress, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    outletName,
+    outletAddress,
+    outletPhone,
+    receiptHeader,
+    receiptFooter,
+    taxEnabled,
+    taxRate,
+    serviceEnabled,
+    serviceRate,
+    showOutletAddress,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppSetting &&
+          other.id == this.id &&
+          other.outletName == this.outletName &&
+          other.outletAddress == this.outletAddress &&
+          other.outletPhone == this.outletPhone &&
+          other.receiptHeader == this.receiptHeader &&
+          other.receiptFooter == this.receiptFooter &&
+          other.taxEnabled == this.taxEnabled &&
+          other.taxRate == this.taxRate &&
+          other.serviceEnabled == this.serviceEnabled &&
+          other.serviceRate == this.serviceRate &&
+          other.showOutletAddress == this.showOutletAddress &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
+  final Value<String> id;
+  final Value<String> outletName;
+  final Value<String?> outletAddress;
+  final Value<String?> outletPhone;
+  final Value<String?> receiptHeader;
+  final Value<String> receiptFooter;
+  final Value<bool> taxEnabled;
+  final Value<int> taxRate;
+  final Value<bool> serviceEnabled;
+  final Value<int> serviceRate;
+  final Value<bool> showOutletAddress;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const AppSettingsCompanion({
+    this.id = const Value.absent(),
+    this.outletName = const Value.absent(),
+    this.outletAddress = const Value.absent(),
+    this.outletPhone = const Value.absent(),
+    this.receiptHeader = const Value.absent(),
+    this.receiptFooter = const Value.absent(),
+    this.taxEnabled = const Value.absent(),
+    this.taxRate = const Value.absent(),
+    this.serviceEnabled = const Value.absent(),
+    this.serviceRate = const Value.absent(),
+    this.showOutletAddress = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AppSettingsCompanion.insert({
+    required String id,
+    this.outletName = const Value.absent(),
+    this.outletAddress = const Value.absent(),
+    this.outletPhone = const Value.absent(),
+    this.receiptHeader = const Value.absent(),
+    this.receiptFooter = const Value.absent(),
+    this.taxEnabled = const Value.absent(),
+    this.taxRate = const Value.absent(),
+    this.serviceEnabled = const Value.absent(),
+    this.serviceRate = const Value.absent(),
+    this.showOutletAddress = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<AppSetting> custom({
+    Expression<String>? id,
+    Expression<String>? outletName,
+    Expression<String>? outletAddress,
+    Expression<String>? outletPhone,
+    Expression<String>? receiptHeader,
+    Expression<String>? receiptFooter,
+    Expression<bool>? taxEnabled,
+    Expression<int>? taxRate,
+    Expression<bool>? serviceEnabled,
+    Expression<int>? serviceRate,
+    Expression<bool>? showOutletAddress,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (outletName != null) 'outlet_name': outletName,
+      if (outletAddress != null) 'outlet_address': outletAddress,
+      if (outletPhone != null) 'outlet_phone': outletPhone,
+      if (receiptHeader != null) 'receipt_header': receiptHeader,
+      if (receiptFooter != null) 'receipt_footer': receiptFooter,
+      if (taxEnabled != null) 'tax_enabled': taxEnabled,
+      if (taxRate != null) 'tax_rate': taxRate,
+      if (serviceEnabled != null) 'service_enabled': serviceEnabled,
+      if (serviceRate != null) 'service_rate': serviceRate,
+      if (showOutletAddress != null) 'show_outlet_address': showOutletAddress,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AppSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? outletName,
+    Value<String?>? outletAddress,
+    Value<String?>? outletPhone,
+    Value<String?>? receiptHeader,
+    Value<String>? receiptFooter,
+    Value<bool>? taxEnabled,
+    Value<int>? taxRate,
+    Value<bool>? serviceEnabled,
+    Value<int>? serviceRate,
+    Value<bool>? showOutletAddress,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AppSettingsCompanion(
+      id: id ?? this.id,
+      outletName: outletName ?? this.outletName,
+      outletAddress: outletAddress ?? this.outletAddress,
+      outletPhone: outletPhone ?? this.outletPhone,
+      receiptHeader: receiptHeader ?? this.receiptHeader,
+      receiptFooter: receiptFooter ?? this.receiptFooter,
+      taxEnabled: taxEnabled ?? this.taxEnabled,
+      taxRate: taxRate ?? this.taxRate,
+      serviceEnabled: serviceEnabled ?? this.serviceEnabled,
+      serviceRate: serviceRate ?? this.serviceRate,
+      showOutletAddress: showOutletAddress ?? this.showOutletAddress,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (outletName.present) {
+      map['outlet_name'] = Variable<String>(outletName.value);
+    }
+    if (outletAddress.present) {
+      map['outlet_address'] = Variable<String>(outletAddress.value);
+    }
+    if (outletPhone.present) {
+      map['outlet_phone'] = Variable<String>(outletPhone.value);
+    }
+    if (receiptHeader.present) {
+      map['receipt_header'] = Variable<String>(receiptHeader.value);
+    }
+    if (receiptFooter.present) {
+      map['receipt_footer'] = Variable<String>(receiptFooter.value);
+    }
+    if (taxEnabled.present) {
+      map['tax_enabled'] = Variable<bool>(taxEnabled.value);
+    }
+    if (taxRate.present) {
+      map['tax_rate'] = Variable<int>(taxRate.value);
+    }
+    if (serviceEnabled.present) {
+      map['service_enabled'] = Variable<bool>(serviceEnabled.value);
+    }
+    if (serviceRate.present) {
+      map['service_rate'] = Variable<int>(serviceRate.value);
+    }
+    if (showOutletAddress.present) {
+      map['show_outlet_address'] = Variable<bool>(showOutletAddress.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('outletName: $outletName, ')
+          ..write('outletAddress: $outletAddress, ')
+          ..write('outletPhone: $outletPhone, ')
+          ..write('receiptHeader: $receiptHeader, ')
+          ..write('receiptFooter: $receiptFooter, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('serviceEnabled: $serviceEnabled, ')
+          ..write('serviceRate: $serviceRate, ')
+          ..write('showOutletAddress: $showOutletAddress, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6427,6 +7268,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OrderItemsTable orderItems = $OrderItemsTable(this);
   late final $PaymentsTable payments = $PaymentsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
+  late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6443,6 +7285,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     orderItems,
     payments,
     syncQueue,
+    appSettings,
   ];
 }
 
@@ -6794,6 +7637,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
       Value<String?> barcode,
       required String name,
       Value<String?> description,
+      Value<String?> imagePath,
       required int price,
       Value<int?> cost,
       Value<bool> trackStock,
@@ -6812,6 +7656,7 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<String?> barcode,
       Value<String> name,
       Value<String?> description,
+      Value<String?> imagePath,
       Value<int> price,
       Value<int?> cost,
       Value<bool> trackStock,
@@ -6894,6 +7739,11 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7020,6 +7870,11 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get price => $composableBuilder(
     column: $table.price,
     builder: (column) => ColumnOrderings(column),
@@ -7109,6 +7964,9 @@ class $$ProductsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumn<int> get price =>
       $composableBuilder(column: $table.price, builder: (column) => column);
@@ -7219,6 +8077,7 @@ class $$ProductsTableTableManager
                 Value<String?> barcode = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<int> price = const Value.absent(),
                 Value<int?> cost = const Value.absent(),
                 Value<bool> trackStock = const Value.absent(),
@@ -7235,6 +8094,7 @@ class $$ProductsTableTableManager
                 barcode: barcode,
                 name: name,
                 description: description,
+                imagePath: imagePath,
                 price: price,
                 cost: cost,
                 trackStock: trackStock,
@@ -7253,6 +8113,7 @@ class $$ProductsTableTableManager
                 Value<String?> barcode = const Value.absent(),
                 required String name,
                 Value<String?> description = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 required int price,
                 Value<int?> cost = const Value.absent(),
                 Value<bool> trackStock = const Value.absent(),
@@ -7269,6 +8130,7 @@ class $$ProductsTableTableManager
                 barcode: barcode,
                 name: name,
                 description: description,
+                imagePath: imagePath,
                 price: price,
                 cost: cost,
                 trackStock: trackStock,
@@ -11834,6 +12696,376 @@ typedef $$SyncQueueTableProcessedTableManager =
       SyncQueueData,
       PrefetchHooks Function()
     >;
+typedef $$AppSettingsTableCreateCompanionBuilder =
+    AppSettingsCompanion Function({
+      required String id,
+      Value<String> outletName,
+      Value<String?> outletAddress,
+      Value<String?> outletPhone,
+      Value<String?> receiptHeader,
+      Value<String> receiptFooter,
+      Value<bool> taxEnabled,
+      Value<int> taxRate,
+      Value<bool> serviceEnabled,
+      Value<int> serviceRate,
+      Value<bool> showOutletAddress,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AppSettingsTableUpdateCompanionBuilder =
+    AppSettingsCompanion Function({
+      Value<String> id,
+      Value<String> outletName,
+      Value<String?> outletAddress,
+      Value<String?> outletPhone,
+      Value<String?> receiptHeader,
+      Value<String> receiptFooter,
+      Value<bool> taxEnabled,
+      Value<int> taxRate,
+      Value<bool> serviceEnabled,
+      Value<int> serviceRate,
+      Value<bool> showOutletAddress,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AppSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $AppSettingsTable> {
+  $$AppSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outletName => $composableBuilder(
+    column: $table.outletName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outletAddress => $composableBuilder(
+    column: $table.outletAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outletPhone => $composableBuilder(
+    column: $table.outletPhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get receiptHeader => $composableBuilder(
+    column: $table.receiptHeader,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get receiptFooter => $composableBuilder(
+    column: $table.receiptFooter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get serviceEnabled => $composableBuilder(
+    column: $table.serviceEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get serviceRate => $composableBuilder(
+    column: $table.serviceRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get showOutletAddress => $composableBuilder(
+    column: $table.showOutletAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AppSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AppSettingsTable> {
+  $$AppSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outletName => $composableBuilder(
+    column: $table.outletName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outletAddress => $composableBuilder(
+    column: $table.outletAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outletPhone => $composableBuilder(
+    column: $table.outletPhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get receiptHeader => $composableBuilder(
+    column: $table.receiptHeader,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get receiptFooter => $composableBuilder(
+    column: $table.receiptFooter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get serviceEnabled => $composableBuilder(
+    column: $table.serviceEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get serviceRate => $composableBuilder(
+    column: $table.serviceRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get showOutletAddress => $composableBuilder(
+    column: $table.showOutletAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AppSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AppSettingsTable> {
+  $$AppSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get outletName => $composableBuilder(
+    column: $table.outletName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get outletAddress => $composableBuilder(
+    column: $table.outletAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get outletPhone => $composableBuilder(
+    column: $table.outletPhone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get receiptHeader => $composableBuilder(
+    column: $table.receiptHeader,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get receiptFooter => $composableBuilder(
+    column: $table.receiptFooter,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get taxRate =>
+      $composableBuilder(column: $table.taxRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get serviceEnabled => $composableBuilder(
+    column: $table.serviceEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get serviceRate => $composableBuilder(
+    column: $table.serviceRate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get showOutletAddress => $composableBuilder(
+    column: $table.showOutletAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AppSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppSettingsTable,
+          AppSetting,
+          $$AppSettingsTableFilterComposer,
+          $$AppSettingsTableOrderingComposer,
+          $$AppSettingsTableAnnotationComposer,
+          $$AppSettingsTableCreateCompanionBuilder,
+          $$AppSettingsTableUpdateCompanionBuilder,
+          (
+            AppSetting,
+            BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>,
+          ),
+          AppSetting,
+          PrefetchHooks Function()
+        > {
+  $$AppSettingsTableTableManager(_$AppDatabase db, $AppSettingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AppSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AppSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AppSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> outletName = const Value.absent(),
+                Value<String?> outletAddress = const Value.absent(),
+                Value<String?> outletPhone = const Value.absent(),
+                Value<String?> receiptHeader = const Value.absent(),
+                Value<String> receiptFooter = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<int> taxRate = const Value.absent(),
+                Value<bool> serviceEnabled = const Value.absent(),
+                Value<int> serviceRate = const Value.absent(),
+                Value<bool> showOutletAddress = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AppSettingsCompanion(
+                id: id,
+                outletName: outletName,
+                outletAddress: outletAddress,
+                outletPhone: outletPhone,
+                receiptHeader: receiptHeader,
+                receiptFooter: receiptFooter,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                serviceEnabled: serviceEnabled,
+                serviceRate: serviceRate,
+                showOutletAddress: showOutletAddress,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> outletName = const Value.absent(),
+                Value<String?> outletAddress = const Value.absent(),
+                Value<String?> outletPhone = const Value.absent(),
+                Value<String?> receiptHeader = const Value.absent(),
+                Value<String> receiptFooter = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<int> taxRate = const Value.absent(),
+                Value<bool> serviceEnabled = const Value.absent(),
+                Value<int> serviceRate = const Value.absent(),
+                Value<bool> showOutletAddress = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AppSettingsCompanion.insert(
+                id: id,
+                outletName: outletName,
+                outletAddress: outletAddress,
+                outletPhone: outletPhone,
+                receiptHeader: receiptHeader,
+                receiptFooter: receiptFooter,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                serviceEnabled: serviceEnabled,
+                serviceRate: serviceRate,
+                showOutletAddress: showOutletAddress,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AppSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppSettingsTable,
+      AppSetting,
+      $$AppSettingsTableFilterComposer,
+      $$AppSettingsTableOrderingComposer,
+      $$AppSettingsTableAnnotationComposer,
+      $$AppSettingsTableCreateCompanionBuilder,
+      $$AppSettingsTableUpdateCompanionBuilder,
+      (
+        AppSetting,
+        BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>,
+      ),
+      AppSetting,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11860,4 +13092,6 @@ class $AppDatabaseManager {
       $$PaymentsTableTableManager(_db, _db.payments);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
+  $$AppSettingsTableTableManager get appSettings =>
+      $$AppSettingsTableTableManager(_db, _db.appSettings);
 }

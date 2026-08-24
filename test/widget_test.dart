@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:patali_pos/core/config/patali_app.dart';
 import 'package:patali_pos/data/database/app_database.dart';
 import 'package:patali_pos/data/database/database_provider.dart';
+import 'package:patali_pos/data/repositories/app_settings_repository.dart';
 import 'package:patali_pos/data/repositories/category_repository.dart';
 import 'package:patali_pos/data/repositories/cash_session_repository.dart';
 import 'package:patali_pos/data/repositories/product_repository.dart';
@@ -62,6 +63,21 @@ void main() {
           appDatabaseProvider.overrideWithValue(database),
           activeCashSessionProvider.overrideWith(
             (ref) => Stream.value(openSession),
+          ),
+          appSettingsProvider.overrideWith(
+            (ref) => Stream.value(
+              AppSetting(
+                id: defaultSettingsId,
+                outletName: 'Patali Demo Outlet',
+                receiptFooter: 'Terima kasih',
+                taxEnabled: false,
+                taxRate: 0,
+                serviceEnabled: false,
+                serviceRate: 0,
+                showOutletAddress: true,
+                createdAt: now,
+              ),
+            ),
           ),
           activeCategoriesProvider.overrideWith((ref) => const Stream.empty()),
           filteredProductsProvider.overrideWith(

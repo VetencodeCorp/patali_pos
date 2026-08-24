@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../data/repositories/app_settings_repository.dart';
 import '../../../data/repositories/order_repository.dart';
 import '../application/receipt_text_formatter.dart';
 
@@ -24,8 +26,10 @@ class ReceiptScreen extends ConsumerWidget {
       decimalDigits: 0,
     );
     final dateFormat = DateFormat('dd MMM yyyy HH:mm', 'id_ID');
+    final settings = ref.watch(appSettingsProvider).valueOrNull;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Struk'),
         actions: [
@@ -39,7 +43,10 @@ class ReceiptScreen extends ConsumerWidget {
       body: SafeArea(
         child: receipt.when(
           data: (data) {
-            final thermalText = ReceiptTextFormatter().format(data);
+            final thermalText = ReceiptTextFormatter().format(
+              data,
+              settings: settings,
+            );
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -47,7 +54,7 @@ class ReceiptScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Patali Demo Outlet',
+                        settings?.outletName ?? 'Patali Demo Outlet',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 4),
@@ -78,7 +85,7 @@ class ReceiptScreen extends ConsumerWidget {
                   value: currency.format(data.order.discountTotal),
                 ),
                 _ReceiptRow(
-                  label: 'Pajak',
+                  label: 'Pajak/Service',
                   value: currency.format(data.order.taxTotal),
                 ),
                 const SizedBox(height: 8),
@@ -94,7 +101,7 @@ class ReceiptScreen extends ConsumerWidget {
                     value: currency.format(payment.amount),
                   ),
                 const SizedBox(height: 20),
-                const Center(child: Text('Terima kasih')),
+                Center(child: Text(settings?.receiptFooter ?? 'Terima kasih')),
                 const SizedBox(height: 24),
                 Row(
                   children: [

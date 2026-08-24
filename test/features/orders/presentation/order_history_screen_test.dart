@@ -77,7 +77,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Batalkan'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Salah input');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Alasan'),
+      'Salah input',
+    );
     await tester.tap(find.widgetWithText(FilledButton, 'Batalkan transaksi'));
     await tester.pumpAndSettle();
 

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../features/orders/presentation/order_history_screen.dart';
 import '../../features/pos/presentation/pos_screen.dart';
-import '../../features/reports/presentation/sales_summary_screen.dart';
+import '../../features/reports/presentation/reports_screen.dart';
 import '../../features/settings/presentation/product_management_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 
@@ -261,7 +261,7 @@ const _items = [
   _NavItem(
     index: 2,
     label: 'Laporan',
-    route: SalesSummaryScreen.routePath,
+    route: ReportsScreen.routePath,
     icon: Icons.analytics_outlined,
     activeIcon: Icons.analytics,
   ),

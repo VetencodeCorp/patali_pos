@@ -27,6 +27,7 @@ class Products extends Table {
   TextColumn get barcode => text().nullable()();
   TextColumn get name => text()();
   TextColumn get description => text().nullable()();
+  TextColumn get imagePath => text().nullable()();
   IntColumn get price => integer()();
   IntColumn get cost => integer().nullable()();
   BoolColumn get trackStock => boolean().withDefault(const Constant(false))();
@@ -180,6 +181,29 @@ class SyncQueue extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class AppSettings extends Table {
+  TextColumn get id => text()();
+  TextColumn get outletName =>
+      text().withDefault(const Constant('Patali Demo Outlet'))();
+  TextColumn get outletAddress => text().nullable()();
+  TextColumn get outletPhone => text().nullable()();
+  TextColumn get receiptHeader => text().nullable()();
+  TextColumn get receiptFooter =>
+      text().withDefault(const Constant('Terima kasih'))();
+  BoolColumn get taxEnabled => boolean().withDefault(const Constant(false))();
+  IntColumn get taxRate => integer().withDefault(const Constant(0))();
+  BoolColumn get serviceEnabled =>
+      boolean().withDefault(const Constant(false))();
+  IntColumn get serviceRate => integer().withDefault(const Constant(0))();
+  BoolColumn get showOutletAddress =>
+      boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Categories,
@@ -193,6 +217,7 @@ class SyncQueue extends Table {
     OrderItems,
     Payments,
     SyncQueue,
+    AppSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -201,7 +226,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(products, products.imagePath);
+      }
+      if (from < 3) {
+        await migrator.createTable(appSettings);
+      }
+    },
+  );
 }
 
 LazyDatabase _openConnection() {

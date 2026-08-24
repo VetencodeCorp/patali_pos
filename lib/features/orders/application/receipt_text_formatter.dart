@@ -1,3 +1,4 @@
+import '../../../data/database/app_database.dart';
 import '../../../data/repositories/order_repository.dart';
 
 class ReceiptTextFormatter {
@@ -5,10 +6,22 @@ class ReceiptTextFormatter {
 
   final int columns;
 
-  String format(OrderReceipt receipt) {
+  String format(OrderReceipt receipt, {AppSetting? settings}) {
+    final outletName = settings?.outletName ?? 'Patali Demo Outlet';
+    final header = settings?.receiptHeader;
+    final footer = settings?.receiptFooter ?? 'Terima kasih';
+    final address = settings?.showOutletAddress ?? true
+        ? settings?.outletAddress
+        : null;
+    final phone = settings?.showOutletAddress ?? true
+        ? settings?.outletPhone
+        : null;
+
     final lines = <String>[
-      _center('PATALI DEMO OUTLET'),
-      _center('Patali POS'),
+      _center(outletName.toUpperCase()),
+      if (header != null && header.isNotEmpty) _center(header),
+      if (address != null && address.isNotEmpty) _center(address),
+      if (phone != null && phone.isNotEmpty) _center(phone),
       _line(),
       receipt.order.orderNumber,
       _date(receipt.order.orderedAt),
@@ -23,13 +36,13 @@ class ReceiptTextFormatter {
       _line(),
       _columns('Subtotal', _money(receipt.order.subtotal)),
       _columns('Diskon', _money(receipt.order.discountTotal)),
-      _columns('Pajak', _money(receipt.order.taxTotal)),
+      _columns('Pajak/Service', _money(receipt.order.taxTotal)),
       _columns('TOTAL', _money(receipt.order.grandTotal)),
       _line(),
       for (final payment in receipt.payments)
         _columns(payment.method.toUpperCase(), _money(payment.amount)),
       _line(),
-      _center('Terima kasih'),
+      _center(footer),
       '',
     ];
 

@@ -60,18 +60,5 @@ class AppTheme {
     );
   }
 
-  static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme.copyWith(
-        primary: AppColors.primary,
-        secondary: AppColors.amber,
-      ),
-    );
-  }
+  static ThemeData get dark => light;
 }
