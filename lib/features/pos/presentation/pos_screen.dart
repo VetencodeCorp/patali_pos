@@ -1,123 +1,1023 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../data/database/app_database.dart';
+import '../../../data/repositories/cash_session_repository.dart';
+import '../../../data/repositories/category_repository.dart';
+import '../../../data/repositories/product_repository.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import '../../orders/presentation/receipt_screen.dart';
+import '../application/cart_controller.dart';
+import '../application/cash_session_controller.dart';
+import '../application/checkout_controller.dart';
 
-class PosScreen extends StatelessWidget {
+const _ink = Color(0xFF17211F);
+const _muted = Color(0xFF73807B);
+const _surface = Color(0xFFFFFFFF);
+const _surfaceTint = Color(0xFFF7FBF8);
+const _border = Color(0xFFE2ECE7);
+const _brand = Color(0xFF16725F);
+const _mint = Color(0xFFE8F7F1);
+
+class PosScreen extends ConsumerWidget {
   const PosScreen({super.key});
 
   static const routePath = '/pos';
 
   @override
-  Widget build(BuildContext context) {
-    final products = [
-      ('Kopi Susu', 18000),
-      ('Americano', 15000),
-      ('Nasi Goreng', 28000),
-      ('Roti Bakar', 17000),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = ref.watch(filteredProductsProvider);
+    final categories = ref.watch(activeCategoriesProvider);
+    final cashSession = ref.watch(activeCashSessionProvider);
+    final cartItems = ref.watch(cartControllerProvider);
 
     return PataliShell(
-      title: 'Kasir',
+      title: 'Patali POS',
       currentIndex: 0,
       actions: [
-        IconButton(
-          tooltip: 'Scan barcode',
-          onPressed: () {},
-          icon: const Icon(Icons.qr_code_scanner),
+        cashSession.when(
+          data: (session) => Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: TextButton.icon(
+              onPressed: () => _toggleSession(context, ref, session),
+              icon: Icon(session == null ? Icons.lock_open : Icons.lock),
+              label: Text(session == null ? 'Buka' : 'Tutup'),
+            ),
+          ),
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+          error: (error, stackTrace) => IconButton(
+            tooltip: 'Status kasir gagal dimuat',
+            onPressed: null,
+            icon: const Icon(Icons.error_outline),
+          ),
         ),
       ],
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 720;
-          final productGrid = GridView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: products.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: wide ? 3 : 2,
-              childAspectRatio: wide ? 1.7 : 1.25,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return Card(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.$1,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const Spacer(),
-                        Text('Rp ${product.$2}'),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
+      child: DecoratedBox(
+        decoration: const BoxDecoration(color: Color(0xFFF6FAF8)),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 980;
+            final session = cashSession.valueOrNull;
+            final categoryFilter = categories.when(
+              data: (items) => _CategoryFilter(categories: items),
+              loading: () => const SizedBox(height: 60),
+              error: (error, stackTrace) =>
+                  _InlineError(message: 'Kategori gagal dimuat: $error'),
+            );
+            final productGrid = products.when(
+              data: (items) => _ProductGrid(products: items, wide: wide),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) =>
+                  _InlineError(message: 'Gagal memuat produk: $error'),
+            );
 
-          final cart = _CartSummary(wide: wide);
-          if (wide) {
-            return Row(
+            final productArea = Column(
               children: [
-                Expanded(flex: 3, child: productGrid),
-                SizedBox(width: 360, child: cart),
+                _PosHeader(session: session, cartItems: cartItems),
+                if (wide || cartItems.isEmpty) const _SearchBar(),
+                if (wide || cartItems.isEmpty) categoryFilter,
+                Expanded(child: productGrid),
               ],
             );
-          }
-          return Column(
-            children: [
-              Expanded(child: productGrid),
-              cart,
-            ],
-          );
-        },
+
+            if (wide) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(flex: 7, child: productArea),
+                    const SizedBox(width: 16),
+                    const SizedBox(width: 390, child: _CartPanel(wide: true)),
+                  ],
+                ),
+              );
+            }
+
+            return Column(
+              children: [
+                if (cartItems.isEmpty)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                      child: productArea,
+                    ),
+                  ),
+                if (cartItems.isEmpty)
+                  const _CartPanel(wide: false)
+                else
+                  const Expanded(child: _CartPanel(wide: false)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleSession(
+    BuildContext context,
+    WidgetRef ref,
+    CashSession? session,
+  ) async {
+    try {
+      if (session == null) {
+        final openingCash = await _showMoneyDialog(
+          context: context,
+          title: 'Buka kasir',
+          label: 'Modal awal',
+          confirmLabel: 'Buka',
+        );
+        if (openingCash == null) return;
+
+        await ref
+            .read(cashSessionControllerProvider.notifier)
+            .openSession(openingCash: openingCash);
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Kasir dibuka')));
+        return;
+      }
+
+      final closingCash = await _showMoneyDialog(
+        context: context,
+        title: 'Tutup kasir',
+        label: 'Uang fisik',
+        confirmLabel: 'Tutup',
+      );
+      if (closingCash == null) return;
+
+      await ref
+          .read(cashSessionControllerProvider.notifier)
+          .closeSession(sessionId: session.id, closingCash: closingCash);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kasir ditutup')));
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal update kasir: $error')));
+    }
+  }
+
+  Future<int?> _showMoneyDialog({
+    required BuildContext context,
+    required String title,
+    required String label,
+    required String confirmLabel,
+  }) {
+    final controller = TextEditingController(text: '0');
+
+    return showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: label, prefixText: 'Rp '),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final value = _parseMoney(controller.text);
+                Navigator.of(context).pop(value);
+              },
+              child: Text(confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+int _parseMoney(String value) {
+  return int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+}
+
+class _PosHeader extends StatelessWidget {
+  const _PosHeader({required this.session, required this.cartItems});
+
+  final CashSession? session;
+  final List<CartItem> cartItems;
+
+  @override
+  Widget build(BuildContext context) {
+    final currency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    final isOpen = session != null;
+
+    return _GlassPanel(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: _brand,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.hub, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Patali Demo Outlet',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: _ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isOpen
+                      ? 'Kasir sedang buka - modal ${currency.format(session!.openingCash)}'
+                      : 'Buka kasir untuk checkout',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isOpen
+                        ? _brand
+                        : Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _MetricPill(
+            label: '${cartItems.totalQty} item',
+            value: currency.format(cartItems.grandTotal(0)),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _CartSummary extends StatelessWidget {
-  const _CartSummary({required this.wide});
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: _GlassPanel(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.search, color: _muted, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Cari produk',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: _muted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 48,
+            width: 52,
+            child: FilledButton(
+              onPressed: () {},
+              style: FilledButton.styleFrom(
+                padding: EdgeInsets.zero,
+                backgroundColor: _ink,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Icon(Icons.qr_code_scanner),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryFilter extends ConsumerWidget {
+  const _CategoryFilter({required this.categories});
+
+  final List<Category> categories;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedId = ref.watch(selectedCategoryIdProvider);
+
+    return SizedBox(
+      height: 60,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        scrollDirection: Axis.horizontal,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: const Text('Semua'),
+              selected: selectedId == null,
+              onSelected: (_) {
+                ref.read(selectedCategoryIdProvider.notifier).state = null;
+              },
+            ),
+          ),
+          for (final category in categories)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(category.name),
+                selected: selectedId == category.id,
+                onSelected: (_) {
+                  ref.read(selectedCategoryIdProvider.notifier).state =
+                      category.id;
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductGrid extends ConsumerWidget {
+  const _ProductGrid({required this.products, required this.wide});
+
+  final List<Product> products;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (products.isEmpty) {
+      return const Center(child: Text('Belum ada produk'));
+    }
+
+    final currency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: products.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: wide ? 4 : 2,
+        childAspectRatio: wide ? 1.35 : 1.02,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return _GlassPanel(
+          onTap: () {
+            ref.read(cartControllerProvider.notifier).addProduct(product);
+          },
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _mint,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.restaurant_menu,
+                      color: _brand,
+                      size: 19,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.add_circle, color: _brand, size: 23),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                product.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: _ink,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                currency.format(product.price),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _brand,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CartPanel extends ConsumerWidget {
+  const _CartPanel({required this.wide});
+
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartItems = ref.watch(cartControllerProvider);
+    final discountTotal = ref.watch(cartDiscountProvider);
+    final paymentMethod = ref.watch(selectedPaymentMethodProvider);
+    final checkoutState = ref.watch(checkoutControllerProvider);
+    final cashSession = ref.watch(activeCashSessionProvider).valueOrNull;
+    final currency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    final subtotal = cartItems.subtotal;
+    final safeDiscount = discountTotal.clamp(0, subtotal);
+    final grandTotal = cartItems.grandTotal(safeDiscount);
+
+    if (!wide && cartItems.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+        child: _GlassPanel(
+          blur: true,
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Belum ada item',
+                  style: TextStyle(color: _muted, fontWeight: FontWeight.w700),
+                ),
+              ),
+              Text(
+                currency.format(0),
+                style: const TextStyle(
+                  color: _ink,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _GlassPanel(
+      blur: true,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: wide ? MainAxisSize.max : MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: _ink,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Cart',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: _ink,
+                  ),
+                ),
+              ),
+              if (cartItems.isNotEmpty)
+                IconButton(
+                  tooltip: 'Kosongkan',
+                  onPressed: () {
+                    ref.read(cartControllerProvider.notifier).clear();
+                    ref.read(cartDiscountProvider.notifier).state = 0;
+                    ref.read(selectedPaymentMethodProvider.notifier).state =
+                        'cash';
+                  },
+                  icon: const Icon(Icons.delete_sweep_outlined),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (cartItems.isEmpty)
+            _EmptyCart(wide: wide)
+          else
+            Flexible(
+              fit: wide ? FlexFit.tight : FlexFit.loose,
+              child: ListView.separated(
+                shrinkWrap: !wide,
+                itemCount: cartItems.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+                  return _CartItemTile(item: item, currency: currency);
+                },
+              ),
+            ),
+          if (wide && cartItems.isEmpty) const Spacer(),
+          if (!wide) const SizedBox(height: 14),
+          const Divider(height: 24),
+          _CartAmountRow(
+            label: 'Subtotal (${cartItems.totalQty} item)',
+            value: currency.format(subtotal),
+          ),
+          const SizedBox(height: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: cartItems.isEmpty
+                ? null
+                : () => _showDiscountDialog(
+                    context: context,
+                    ref: ref,
+                    currentDiscount: safeDiscount,
+                    subtotal: subtotal,
+                  ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: _CartAmountRow(
+                label: 'Diskon',
+                value: safeDiscount == 0
+                    ? 'Tambah'
+                    : '-${currency.format(safeDiscount)}',
+                valueColor: safeDiscount == 0 ? _brand : _ink,
+                trailingIcon: Icons.edit_outlined,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _CartAmountRow(
+            label: 'Total',
+            value: currency.format(grandTotal),
+            emphasized: true,
+          ),
+          const SizedBox(height: 12),
+          _PaymentMethodSelector(enabled: cartItems.isNotEmpty),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed:
+                cartItems.isEmpty ||
+                    checkoutState.isLoading ||
+                    cashSession == null
+                ? null
+                : () async {
+                    try {
+                      final order = await ref
+                          .read(checkoutControllerProvider.notifier)
+                          .checkout(paymentMethod: paymentMethod);
+                      if (!context.mounted) return;
+                      final methodLabel = _paymentMethodLabel(paymentMethod);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Checkout $methodLabel berhasil: ${order.orderNumber}',
+                          ),
+                        ),
+                      );
+                      context.push(ReceiptScreen.location(order.id));
+                    } catch (error) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Checkout gagal: $error')),
+                      );
+                    }
+                  },
+            icon: const Icon(Icons.payments_outlined),
+            label: Text(checkoutState.isLoading ? 'Memproses' : 'Checkout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showDiscountDialog({
+    required BuildContext context,
+    required WidgetRef ref,
+    required int currentDiscount,
+    required int subtotal,
+  }) async {
+    final controller = TextEditingController(text: currentDiscount.toString());
+    final value = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Diskon transaksi'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Nominal diskon',
+              prefixText: 'Rp ',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(0),
+              child: const Text('Hapus'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(context).pop(_parseMoney(controller.text));
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (value == null) return;
+    ref.read(cartDiscountProvider.notifier).state = value.clamp(0, subtotal);
+  }
+}
+
+const _paymentMethods = [
+  ('cash', 'Tunai', Icons.payments_outlined),
+  ('qris', 'QRIS', Icons.qr_code_2),
+  ('debit', 'Debit', Icons.credit_card),
+  ('transfer', 'Transfer', Icons.account_balance),
+];
+
+String _paymentMethodLabel(String method) {
+  return switch (method) {
+    'cash' => 'tunai',
+    'qris' => 'QRIS',
+    'debit' => 'debit',
+    'transfer' => 'transfer',
+    _ => method,
+  };
+}
+
+class _PaymentMethodSelector extends ConsumerWidget {
+  const _PaymentMethodSelector({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(selectedPaymentMethodProvider);
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final (method, label, icon) in _paymentMethods)
+          ChoiceChip(
+            avatar: Icon(icon, size: 17),
+            label: Text(label),
+            selected: selected == method,
+            onSelected: enabled
+                ? (_) {
+                    ref.read(selectedPaymentMethodProvider.notifier).state =
+                        method;
+                  }
+                : null,
+          ),
+      ],
+    );
+  }
+}
+
+class _CartAmountRow extends StatelessWidget {
+  const _CartAmountRow({
+    required this.label,
+    required this.value,
+    this.emphasized = false,
+    this.valueColor,
+    this.trailingIcon,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasized;
+  final Color? valueColor;
+  final IconData? trailingIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = emphasized
+        ? Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: _ink,
+            fontWeight: FontWeight.w900,
+          )
+        : const TextStyle(color: _muted, fontWeight: FontWeight.w700);
+    final valueStyle = emphasized
+        ? Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: _ink,
+            fontWeight: FontWeight.w900,
+          )
+        : TextStyle(color: valueColor ?? _ink, fontWeight: FontWeight.w800);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Text(label, style: labelStyle)),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(value, style: valueStyle),
+            if (trailingIcon != null) ...[
+              const SizedBox(width: 6),
+              Icon(trailingIcon, size: 16, color: _muted),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _CartItemTile extends ConsumerWidget {
+  const _CartItemTile({required this.item, required this.currency});
+
+  final CartItem item;
+  final NumberFormat currency;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(cartControllerProvider.notifier);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _surfaceTint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.product.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: _ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  currency.format(item.lineTotal),
+                  style: const TextStyle(
+                    color: _muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _QtyButton(
+            tooltip: 'Kurangi',
+            icon: Icons.remove,
+            onPressed: () => controller.decreaseQty(item.product.id),
+          ),
+          SizedBox(
+            width: 30,
+            child: Text(
+              '${item.qty}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+          ),
+          _QtyButton(
+            tooltip: 'Tambah',
+            icon: Icons.add,
+            onPressed: () => controller.addProduct(item.product),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QtyButton extends StatelessWidget {
+  const _QtyButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(11),
+        onTap: onPressed,
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(color: _border),
+          ),
+          child: Icon(icon, size: 18, color: _brand),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassPanel extends StatelessWidget {
+  const _GlassPanel({
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.onTap,
+    this.blur = false,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final bool blur;
+
+  @override
+  Widget build(BuildContext context) {
+    final panel = ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: BackdropFilter(
+        filter: blur
+            ? ImageFilter.blur(sigmaX: 14, sigmaY: 14)
+            : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: padding,
+          decoration: BoxDecoration(
+            color: _surface.withValues(alpha: 0.86),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: _border),
+            boxShadow: [
+              BoxShadow(
+                color: _brand.withValues(alpha: 0.06),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+
+    if (onTap == null) return panel;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: panel,
+      ),
+    );
+  }
+}
+
+class _MetricPill extends StatelessWidget {
+  const _MetricPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 132),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: _mint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _brand.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: _muted,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: _brand,
+              fontWeight: FontWeight.w900,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyCart extends StatelessWidget {
+  const _EmptyCart({required this.wide});
 
   final bool wide;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: wide ? 160 : null,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: const Border(top: BorderSide(color: Color(0xFFE0E5E1))),
+        color: _surfaceTint,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _border),
       ),
-      child: Column(
-        mainAxisSize: wide ? MainAxisSize.max : MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('Cart', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          const Text('Belum ada item'),
-          if (wide) const Spacer() else const SizedBox(height: 16),
-          const Divider(),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('Total'), Text('Rp 0')],
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: null,
-            icon: const Icon(Icons.payments),
-            label: const Text('Checkout'),
-          ),
-        ],
+      child: const Center(
+        child: Text(
+          'Belum ada item',
+          style: TextStyle(color: _muted, fontWeight: FontWeight.w700),
+        ),
       ),
+    );
+  }
+}
+
+class _InlineError extends StatelessWidget {
+  const _InlineError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(padding: const EdgeInsets.all(24), child: Text(message)),
     );
   }
 }
