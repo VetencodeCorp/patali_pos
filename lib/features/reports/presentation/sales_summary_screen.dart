@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../data/repositories/sales_summary_repository.dart';
+import '../../../shared/widgets/patali_shell.dart';
 
 class SalesSummaryScreen extends ConsumerWidget {
   const SalesSummaryScreen({super.key});
@@ -21,80 +22,79 @@ class SalesSummaryScreen extends ConsumerWidget {
       decimalDigits: 0,
     );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Laporan Harian')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tanggal',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(dateFormat.format(selectedDate)),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Pilih tanggal',
-                      onPressed: () => _pickDate(context, ref, selectedDate),
-                      icon: const Icon(Icons.calendar_month),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            summary.when(
-              data: (data) => Column(
+    return PataliShell(
+      title: 'Laporan Harian',
+      currentIndex: 2,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
-                  _SummaryHero(
-                    label: shortDateFormat.format(data.start),
-                    value: currency.format(data.totalSales),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tanggal',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(dateFormat.format(selectedDate)),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _SummaryTile(
-                    icon: Icons.receipt_long,
-                    title: 'Jumlah order',
-                    value: '${data.orderCount}',
-                  ),
-                  _SummaryTile(
-                    icon: Icons.payments,
-                    title: 'Tunai',
-                    value: currency.format(data.cashSales),
-                  ),
-                  _SummaryTile(
-                    icon: Icons.credit_card,
-                    title: 'Non-tunai',
-                    value: currency.format(data.nonCashSales),
-                  ),
-                  _SummaryTile(
-                    icon: Icons.trending_up,
-                    title: 'Average order',
-                    value: currency.format(data.averageOrderValue),
+                  IconButton(
+                    tooltip: 'Pilih tanggal',
+                    onPressed: () => _pickDate(context, ref, selectedDate),
+                    icon: const Icon(Icons.calendar_month),
                   ),
                 ],
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text('Gagal memuat laporan: $error'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          summary.when(
+            data: (data) => Column(
+              children: [
+                _SummaryHero(
+                  label: shortDateFormat.format(data.start),
+                  value: currency.format(data.totalSales),
                 ),
+                const SizedBox(height: 12),
+                _SummaryTile(
+                  icon: Icons.receipt_long,
+                  title: 'Jumlah order',
+                  value: '${data.orderCount}',
+                ),
+                _SummaryTile(
+                  icon: Icons.payments,
+                  title: 'Tunai',
+                  value: currency.format(data.cashSales),
+                ),
+                _SummaryTile(
+                  icon: Icons.credit_card,
+                  title: 'Non-tunai',
+                  value: currency.format(data.nonCashSales),
+                ),
+                _SummaryTile(
+                  icon: Icons.trending_up,
+                  title: 'Average order',
+                  value: currency.format(data.averageOrderValue),
+                ),
+              ],
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text('Gagal memuat laporan: $error'),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

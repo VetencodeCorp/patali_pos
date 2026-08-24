@@ -48,4 +48,32 @@ void main() {
     expect(closedSession.expectedCash, 136000);
     expect(closedSession.closingCash, 136000);
   });
+
+  test('excludes voided cash payments from expected cash', () async {
+    final session = await cashSessions.openSession(openingCash: 100000);
+    final order = await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 36000,
+      discountTotal: 0,
+      grandTotal: 36000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 2,
+          unitPrice: 18000,
+          lineTotal: 36000,
+        ),
+      ],
+    );
+
+    await orders.voidOrder(order.id);
+    await cashSessions.closeSession(sessionId: session.id, closingCash: 100000);
+
+    final closedSession = await database
+        .select(database.cashSessions)
+        .getSingle();
+
+    expect(closedSession.expectedCash, 100000);
+  });
 }

@@ -10,6 +10,7 @@ import '../../../data/repositories/cash_session_repository.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import '../../orders/presentation/order_history_screen.dart';
 import '../../orders/presentation/receipt_screen.dart';
 import '../application/cart_controller.dart';
 import '../application/cash_session_controller.dart';
@@ -107,17 +108,13 @@ class PosScreen extends ConsumerWidget {
 
             return Column(
               children: [
-                if (cartItems.isEmpty)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-                      child: productArea,
-                    ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                    child: productArea,
                   ),
-                if (cartItems.isEmpty)
-                  const _CartPanel(wide: false)
-                else
-                  const Expanded(child: _CartPanel(wide: false)),
+                ),
+                const _MobilePosActionBar(),
               ],
             );
           },
@@ -405,8 +402,15 @@ class _ProductGrid extends ConsumerWidget {
       ),
       itemBuilder: (context, index) {
         final product = products[index];
+        final outOfStock = product.trackStock && product.stockQty <= 0;
         return _GlassPanel(
           onTap: () {
+            if (outOfStock) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Stok ${product.name} habis')),
+              );
+              return;
+            }
             ref.read(cartControllerProvider.notifier).addProduct(product);
           },
           padding: const EdgeInsets.all(14),
@@ -446,14 +450,244 @@ class _ProductGrid extends ConsumerWidget {
               Text(
                 currency.format(product.price),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: _brand,
+                  color: outOfStock ? _muted : _brand,
                   fontWeight: FontWeight.w900,
                 ),
               ),
+              if (product.trackStock) ...[
+                const SizedBox(height: 4),
+                Text(
+                  outOfStock ? 'Stok habis' : 'Stok ${product.stockQty}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: outOfStock
+                        ? Theme.of(context).colorScheme.error
+                        : _muted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _MobilePosActionBar extends ConsumerWidget {
+  const _MobilePosActionBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartItems = ref.watch(cartControllerProvider);
+    final orderType = ref.watch(selectedOrderTypeProvider);
+    final discount = ref.watch(cartDiscountProvider);
+    final currency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    final total = cartItems.grandTotal(discount);
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _surface.withValues(alpha: 0.94),
+          border: const Border(top: BorderSide(color: _border)),
+          boxShadow: [
+            BoxShadow(
+              color: _ink.withValues(alpha: 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, -8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 62,
+              child: Row(
+                children: [
+                  _MobileActionButton(
+                    icon: Icons.more_horiz,
+                    label: '',
+                    onTap: () {},
+                  ),
+                  _MobileActionButton(
+                    icon: Icons.person_add_alt_1_outlined,
+                    label: 'Pelanggan',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pelanggan menyusul')),
+                      );
+                    },
+                  ),
+                  _MobileActionButton(
+                    icon: Icons.room_service_outlined,
+                    label: orderType,
+                    onTap: () => _showOrderTypeSheet(context, ref),
+                  ),
+                  _MobileActionButton(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'Daftar Order',
+                    onTap: () => context.go(OrderHistoryScreen.routePath),
+                  ),
+                ],
+              ),
+            ),
+            Material(
+              color: const Color(0xFFF2F5F3),
+              child: InkWell(
+                onTap: () => _showCartSheet(context),
+                child: SizedBox(
+                  height: 72,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${cartItems.totalQty} Produk',
+                            style: TextStyle(
+                              color: cartItems.isEmpty ? _muted : _ink,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          currency.format(total),
+                          style: TextStyle(
+                            color: cartItems.isEmpty ? _muted : _ink,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(Icons.chevron_right, color: _muted),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCartSheet(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.72,
+          minChildSize: 0.38,
+          maxChildSize: 0.92,
+          expand: false,
+          builder: (context, scrollController) {
+            return const Padding(
+              padding: EdgeInsets.all(12),
+              child: _CartPanel(wide: false),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showOrderTypeSheet(BuildContext context, WidgetRef ref) {
+    const options = [
+      (Icons.table_restaurant_outlined, 'Meja'),
+      (Icons.event_seat_outlined, 'Free Table'),
+      (Icons.takeout_dining_outlined, 'Bungkus'),
+      (Icons.local_shipping_outlined, 'Pengiriman'),
+      (Icons.delivery_dining_outlined, 'Ojek Online'),
+      (Icons.timer_outlined, 'Quick Service'),
+      (Icons.event_available_outlined, 'Reservasi'),
+    ];
+
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            children: [
+              Text(
+                'Jenis Order',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final (icon, label) in options)
+                ListTile(
+                  leading: Icon(icon),
+                  title: Text(
+                    label,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  onTap: () {
+                    ref.read(selectedOrderTypeProvider.notifier).state = label;
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MobileActionButton extends StatelessWidget {
+  const _MobileActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              border: Border(right: BorderSide(color: _border)),
+            ),
+            child: Center(
+              child: label.isEmpty
+                  ? Icon(icon, color: _brand)
+                  : Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _brand,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

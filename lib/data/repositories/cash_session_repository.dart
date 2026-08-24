@@ -74,6 +74,7 @@ class CashSessionRepository {
         ? <Payment>[]
         : await (_database.select(_database.payments)..where((payment) {
                 return payment.method.equals('cash') &
+                    payment.status.equals('paid') &
                     payment.orderId.isIn(orderIds);
               }))
               .get();

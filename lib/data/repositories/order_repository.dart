@@ -16,6 +16,18 @@ final recentOrdersProvider = StreamProvider<List<Order>>((ref) {
   return ref.watch(orderRepositoryProvider).watchRecentOrders();
 });
 
+final orderHistoryDateProvider = StateProvider<DateTime?>((ref) => null);
+
+final orderHistoryPaymentMethodProvider = StateProvider<String?>((ref) => null);
+
+final orderHistoryItemsProvider = StreamProvider<List<OrderListItem>>((ref) {
+  final date = ref.watch(orderHistoryDateProvider);
+  final paymentMethod = ref.watch(orderHistoryPaymentMethodProvider);
+  return ref
+      .watch(orderRepositoryProvider)
+      .watchOrderHistory(date: date, paymentMethod: paymentMethod);
+});
+
 final orderReceiptProvider = FutureProvider.family<OrderReceipt, String>((
   ref,
   orderId,
@@ -35,6 +47,45 @@ class OrderRepository {
       ..limit(50);
 
     return query.watch();
+  }
+
+  Stream<List<OrderListItem>> watchOrderHistory({
+    DateTime? date,
+    String? paymentMethod,
+  }) {
+    final query = _database.select(_database.orders).join([
+      leftOuterJoin(
+        _database.payments,
+        _database.payments.orderId.equalsExp(_database.orders.id),
+      ),
+    ]);
+
+    if (date != null) {
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+      query.where(
+        _database.orders.orderedAt.isBiggerOrEqualValue(start) &
+            _database.orders.orderedAt.isSmallerThanValue(end),
+      );
+    }
+
+    if (paymentMethod != null) {
+      query.where(_database.payments.method.equals(paymentMethod));
+    }
+
+    query
+      ..orderBy([OrderingTerm.desc(_database.orders.orderedAt)])
+      ..limit(50);
+
+    return query.watch().map((rows) {
+      return [
+        for (final row in rows)
+          OrderListItem(
+            order: row.readTable(_database.orders),
+            payment: row.readTableOrNull(_database.payments),
+          ),
+      ];
+    });
   }
 
   Future<OrderReceipt> getReceipt(String orderId) async {
@@ -69,6 +120,8 @@ class OrderRepository {
     final paymentId = _uuid.v4();
 
     return _database.transaction(() async {
+      await _decreaseTrackedStock(items, now);
+
       await _database
           .into(_database.orders)
           .insert(
@@ -137,6 +190,105 @@ class OrderRepository {
     });
   }
 
+  Future<void> voidOrder(String orderId, {String? reason}) async {
+    final now = DateTime.now();
+    final order = await (_database.select(
+      _database.orders,
+    )..where((order) => order.id.equals(orderId))).getSingle();
+    if (order.status == 'voided') return;
+    if (order.status != 'completed') {
+      throw StateError('Order tidak bisa dibatalkan');
+    }
+
+    await _database.transaction(() async {
+      await (_database.update(
+        _database.orders,
+      )..where((order) => order.id.equals(orderId))).write(
+        OrdersCompanion(
+          status: const Value('voided'),
+          note: reason == null || reason.trim().isEmpty
+              ? const Value.absent()
+              : Value(reason.trim()),
+          updatedAt: Value(now),
+        ),
+      );
+
+      await (_database.update(
+        _database.payments,
+      )..where((payment) => payment.orderId.equals(orderId))).write(
+        PaymentsCompanion(status: const Value('voided'), updatedAt: Value(now)),
+      );
+
+      await _restoreTrackedStock(orderId, now);
+
+      await _database
+          .into(_database.syncQueue)
+          .insert(
+            SyncQueueCompanion.insert(
+              id: _uuid.v4(),
+              entityType: 'order',
+              entityId: orderId,
+              action: 'void',
+              payloadJson: jsonEncode({
+                'order_id': orderId,
+                'order_number': order.orderNumber,
+                'reason': reason?.trim(),
+                'voided_at': now.toIso8601String(),
+              }),
+            ),
+          );
+    });
+  }
+
+  Future<void> _decreaseTrackedStock(
+    List<CreateOrderItem> items,
+    DateTime now,
+  ) async {
+    for (final item in items) {
+      final productId = item.productId;
+      final product = await (_database.select(
+        _database.products,
+      )..where((product) => product.id.equals(productId))).getSingleOrNull();
+      if (product == null || !product.trackStock) continue;
+      if (product.stockQty < item.qty) {
+        throw StateError('Stok ${product.name} tidak cukup');
+      }
+
+      await (_database.update(
+        _database.products,
+      )..where((product) => product.id.equals(productId))).write(
+        ProductsCompanion(
+          stockQty: Value(product.stockQty - item.qty),
+          updatedAt: Value(now),
+        ),
+      );
+    }
+  }
+
+  Future<void> _restoreTrackedStock(String orderId, DateTime now) async {
+    final items = await (_database.select(
+      _database.orderItems,
+    )..where((item) => item.orderId.equals(orderId))).get();
+
+    for (final item in items) {
+      final productId = item.productId;
+      if (productId == null) continue;
+      final product = await (_database.select(
+        _database.products,
+      )..where((product) => product.id.equals(productId))).getSingleOrNull();
+      if (product == null || !product.trackStock) continue;
+
+      await (_database.update(
+        _database.products,
+      )..where((product) => product.id.equals(productId))).write(
+        ProductsCompanion(
+          stockQty: Value(product.stockQty + item.qty),
+          updatedAt: Value(now),
+        ),
+      );
+    }
+  }
+
   String _buildOrderNumber(DateTime value) {
     final stamp =
         '${value.year}'
@@ -148,6 +300,13 @@ class OrderRepository {
         '${value.second.toString().padLeft(2, '0')}';
     return 'INV-$stamp';
   }
+}
+
+class OrderListItem {
+  const OrderListItem({required this.order, required this.payment});
+
+  final Order order;
+  final Payment? payment;
 }
 
 class OrderReceipt {

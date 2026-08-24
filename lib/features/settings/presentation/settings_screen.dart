@@ -15,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PataliShell(
       title: 'Setting',
-      currentIndex: 2,
+      currentIndex: 4,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [

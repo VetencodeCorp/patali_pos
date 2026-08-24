@@ -105,4 +105,32 @@ void main() {
     expect(summary.cashSales, 0);
     expect(summary.nonCashSales, 36000);
   });
+
+  test('excludes voided orders from daily sales', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+    final order = await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 36000,
+      discountTotal: 0,
+      grandTotal: 36000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 2,
+          unitPrice: 18000,
+          lineTotal: 36000,
+        ),
+      ],
+    );
+
+    await orders.voidOrder(order.id);
+
+    final summary = await salesSummary.getDailySummary(DateTime.now());
+
+    expect(summary.totalSales, 0);
+    expect(summary.cashSales, 0);
+    expect(summary.nonCashSales, 0);
+    expect(summary.orderCount, 0);
+  });
 }

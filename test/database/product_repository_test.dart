@@ -24,11 +24,15 @@ void main() {
       name: 'Es Teh',
       price: 8000,
       sku: 'DRK-003',
+      trackStock: true,
+      stockQty: 12,
     );
 
     expect(product.name, 'Es Teh');
     expect(product.price, 8000);
     expect(product.sku, 'DRK-003');
+    expect(product.trackStock, isTrue);
+    expect(product.stockQty, 12);
 
     final activeProducts = await products.watchActiveProducts().first;
 
@@ -47,6 +51,8 @@ void main() {
       name: 'Es Teh Manis',
       price: 9000,
       sku: 'DRK-004',
+      trackStock: true,
+      stockQty: 7,
     );
 
     var activeProducts = await products.watchActiveProducts().first;
@@ -54,6 +60,8 @@ void main() {
     expect(activeProducts.single.name, 'Es Teh Manis');
     expect(activeProducts.single.price, 9000);
     expect(activeProducts.single.sku, 'DRK-004');
+    expect(activeProducts.single.trackStock, isTrue);
+    expect(activeProducts.single.stockQty, 7);
 
     await products.deactivateProduct(product.id);
     activeProducts = await products.watchActiveProducts().first;

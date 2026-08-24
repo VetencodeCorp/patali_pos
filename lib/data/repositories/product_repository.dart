@@ -53,12 +53,21 @@ class ProductRepository {
     String? sku,
     String? barcode,
     String? categoryId,
+    bool trackStock = false,
+    int stockQty = 0,
   }) async {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name', 'Nama produk wajib diisi');
     }
     if (price < 0) {
       throw ArgumentError.value(price, 'price', 'Harga tidak boleh negatif');
+    }
+    if (stockQty < 0) {
+      throw ArgumentError.value(
+        stockQty,
+        'stockQty',
+        'Stok tidak boleh negatif',
+      );
     }
 
     final productId = _uuid.v4();
@@ -74,6 +83,8 @@ class ProductRepository {
             ),
             name: name.trim(),
             price: price,
+            trackStock: Value(trackStock),
+            stockQty: Value(trackStock ? stockQty : 0),
           ),
         );
 
@@ -89,12 +100,21 @@ class ProductRepository {
     String? sku,
     String? barcode,
     String? categoryId,
+    bool trackStock = false,
+    int stockQty = 0,
   }) async {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name', 'Nama produk wajib diisi');
     }
     if (price < 0) {
       throw ArgumentError.value(price, 'price', 'Harga tidak boleh negatif');
+    }
+    if (stockQty < 0) {
+      throw ArgumentError.value(
+        stockQty,
+        'stockQty',
+        'Stok tidak boleh negatif',
+      );
     }
 
     await (_database.update(
@@ -108,6 +128,8 @@ class ProductRepository {
         ),
         name: Value(name.trim()),
         price: Value(price),
+        trackStock: Value(trackStock),
+        stockQty: Value(trackStock ? stockQty : 0),
         updatedAt: Value(DateTime.now()),
       ),
     );

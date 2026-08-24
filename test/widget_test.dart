@@ -99,6 +99,10 @@ void main() {
     await tester.tap(find.byIcon(Icons.add_circle));
     await tester.pumpAndSettle();
 
+    expect(find.text('1 Produk'), findsOneWidget);
+    await tester.tap(find.text('1 Produk'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Subtotal (1 item)'), findsOneWidget);
     expect(find.text('Rp 18.000'), findsWidgets);
 
