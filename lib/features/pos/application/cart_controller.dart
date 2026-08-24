@@ -8,6 +8,8 @@ final cartControllerProvider = NotifierProvider<CartController, List<CartItem>>(
 
 final cartDiscountProvider = StateProvider<int>((ref) => 0);
 
+final selectedPromoIdProvider = StateProvider<String?>((ref) => null);
+
 final selectedPaymentMethodProvider = StateProvider<String>((ref) => 'cash');
 
 final selectedOrderTypeProvider = StateProvider<String>((ref) => 'Bungkus');

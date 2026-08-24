@@ -6,6 +6,7 @@ import '../../../data/repositories/cash_session_repository.dart';
 import '../../../data/repositories/cashier_settings_repository.dart';
 import '../../../data/repositories/order_repository.dart';
 import '../../../data/repositories/payment_settings_repository.dart';
+import '../../../data/repositories/promo_repository.dart';
 import 'cart_controller.dart';
 
 final checkoutControllerProvider =
@@ -18,7 +19,16 @@ class CheckoutController extends AsyncNotifier<void> {
   Future<Order> checkout({required String paymentMethod}) async {
     final cartItems = ref.read(cartControllerProvider);
     final subtotal = cartItems.subtotal;
-    final discountTotal = ref.read(cartDiscountProvider).clamp(0, subtotal);
+    final manualDiscount = ref.read(cartDiscountProvider).clamp(0, subtotal);
+    final promoId = ref.read(selectedPromoIdProvider);
+    final promo = promoId == null
+        ? null
+        : await ref.read(promoRepositoryProvider).getPromoById(promoId);
+    final promoDiscount = calculatePromoDiscount(
+      promo,
+      subtotal - manualDiscount,
+    );
+    final discountTotal = (manualDiscount + promoDiscount).clamp(0, subtotal);
     final settings = await ref
         .read(appSettingsRepositoryProvider)
         .getSettings();
@@ -74,6 +84,7 @@ class CheckoutController extends AsyncNotifier<void> {
 
     ref.read(cartControllerProvider.notifier).clear();
     ref.read(cartDiscountProvider.notifier).state = 0;
+    ref.read(selectedPromoIdProvider.notifier).state = null;
     ref.read(selectedPaymentMethodProvider.notifier).state =
         cashierSettings.defaultPaymentMethod;
     ref.read(selectedOrderTypeProvider.notifier).state =

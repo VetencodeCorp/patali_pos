@@ -285,6 +285,21 @@ class PaymentSettings extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class Promos extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get type => text()(); // amount | percent
+  IntColumn get value => integer()();
+  TextColumn get scope => text().withDefault(const Constant('transaction'))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Categories,
@@ -303,6 +318,7 @@ class PaymentSettings extends Table {
     DeviceSettings,
     CashierSettings,
     PaymentSettings,
+    Promos,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -311,7 +327,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -340,6 +356,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 8) {
         await migrator.createTable(customers);
         await migrator.addColumn(orders, orders.customerId);
+      }
+      if (from < 9) {
+        await migrator.createTable(promos);
       }
     },
   );

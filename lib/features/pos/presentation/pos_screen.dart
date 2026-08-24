@@ -15,6 +15,7 @@ import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/customer_repository.dart';
 import '../../../data/repositories/payment_settings_repository.dart';
 import '../../../data/repositories/product_repository.dart';
+import '../../../data/repositories/promo_repository.dart';
 import '../../../shared/widgets/patali_shell.dart';
 import '../../customers/presentation/customer_management_screen.dart';
 import '../../orders/presentation/order_history_screen.dart';
@@ -616,13 +617,25 @@ class _MobilePosActionBar extends ConsumerWidget {
         ? null
         : ref.watch(customerByIdProvider(selectedCustomerId)).valueOrNull;
     final discount = ref.watch(cartDiscountProvider);
+    final selectedPromoId = ref.watch(selectedPromoIdProvider);
+    final selectedPromo = selectedPromoId == null
+        ? null
+        : ref.watch(promoByIdProvider(selectedPromoId)).valueOrNull;
     final settings = ref.watch(appSettingsProvider).valueOrNull;
     final currency = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    final total = _calculateCartTotal(cartItems, discount, settings);
+    final promoDiscount = calculatePromoDiscount(
+      selectedPromo,
+      (cartItems.subtotal - discount).clamp(0, cartItems.subtotal),
+    );
+    final total = _calculateCartTotal(
+      cartItems,
+      discount + promoDiscount,
+      settings,
+    );
 
     return SafeArea(
       top: false,
@@ -833,6 +846,10 @@ class _CartPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartControllerProvider);
     final discountTotal = ref.watch(cartDiscountProvider);
+    final promoId = ref.watch(selectedPromoIdProvider);
+    final selectedPromo = promoId == null
+        ? null
+        : ref.watch(promoByIdProvider(promoId)).valueOrNull;
     final paymentMethod = ref.watch(selectedPaymentMethodProvider);
     final checkoutState = ref.watch(checkoutControllerProvider);
     final cashSession = ref.watch(activeCashSessionProvider).valueOrNull;
@@ -847,7 +864,12 @@ class _CartPanel extends ConsumerWidget {
       decimalDigits: 0,
     );
     final subtotal = cartItems.subtotal;
-    final safeDiscount = discountTotal.clamp(0, subtotal);
+    final manualDiscount = discountTotal.clamp(0, subtotal);
+    final promoDiscount = calculatePromoDiscount(
+      selectedPromo,
+      subtotal - manualDiscount,
+    );
+    final safeDiscount = (manualDiscount + promoDiscount).clamp(0, subtotal);
     final taxableAmount = subtotal - safeDiscount;
     final taxTotal = settings?.taxEnabled ?? false
         ? (taxableAmount * settings!.taxRate / 100).round()
@@ -922,6 +944,7 @@ class _CartPanel extends ConsumerWidget {
                   onPressed: () {
                     ref.read(cartControllerProvider.notifier).clear();
                     ref.read(cartDiscountProvider.notifier).state = 0;
+                    ref.read(selectedPromoIdProvider.notifier).state = null;
                     ref.read(selectedPaymentMethodProvider.notifier).state =
                         cashierSettings?.defaultPaymentMethod ?? 'cash';
                     ref.read(selectedOrderTypeProvider.notifier).state =
@@ -973,19 +996,19 @@ class _CartPanel extends ConsumerWidget {
                 : () => _showDiscountDialog(
                     context: context,
                     ref: ref,
-                    currentDiscount: safeDiscount,
+                    currentDiscount: manualDiscount,
                     subtotal: subtotal,
                   ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: _CartAmountRow(
                 label: 'Diskon',
-                value: safeDiscount == 0
+                value: manualDiscount == 0
                     ? manualDiscountEnabled
                           ? 'Tambah'
                           : 'Nonaktif'
-                    : '-${currency.format(safeDiscount)}',
-                valueColor: safeDiscount == 0 && manualDiscountEnabled
+                    : '-${currency.format(manualDiscount)}',
+                valueColor: manualDiscount == 0 && manualDiscountEnabled
                     ? _brand
                     : _ink,
                 trailingIcon: manualDiscountEnabled
@@ -993,6 +1016,13 @@ class _CartPanel extends ConsumerWidget {
                     : null,
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          _PromoSelectorRow(
+            enabled: cartItems.isNotEmpty,
+            promo: selectedPromo,
+            discount: promoDiscount,
+            currency: currency,
           ),
           const SizedBox(height: 8),
           if (taxTotal > 0) ...[
@@ -1168,6 +1198,100 @@ class _PaymentMethodSelector extends ConsumerWidget {
       ],
     );
   }
+}
+
+class _PromoSelectorRow extends ConsumerWidget {
+  const _PromoSelectorRow({
+    required this.enabled,
+    required this.promo,
+    required this.discount,
+    required this.currency,
+  });
+
+  final bool enabled;
+  final Promo? promo;
+  final int discount;
+  final NumberFormat currency;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = promo == null
+        ? 'Pilih'
+        : '${promo!.name} (-${currency.format(discount)})';
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: enabled ? () => _showPromoPicker(context, ref) : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: _CartAmountRow(
+          label: 'Promo',
+          value: value,
+          valueColor: promo == null ? _brand : _ink,
+          trailingIcon: Icons.local_offer_outlined,
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showPromoPicker(BuildContext context, WidgetRef ref) async {
+  final selectedId = ref.read(selectedPromoIdProvider);
+  final promos = await ref.read(promoRepositoryProvider).getActivePromos();
+  if (!context.mounted) return;
+
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    useSafeArea: true,
+    builder: (context) {
+      return SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          children: [
+            Text(
+              'Pilih Promo',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.block_outlined),
+              title: const Text(
+                'Tanpa Promo',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              trailing: selectedId == null ? const Icon(Icons.check) : null,
+              onTap: () {
+                ref.read(selectedPromoIdProvider.notifier).state = null;
+                Navigator.of(context).pop();
+              },
+            ),
+            for (final promo in promos)
+              ListTile(
+                leading: const Icon(Icons.local_offer_outlined),
+                title: Text(
+                  promo.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text('${promoValueLabel(promo)} - transaksi'),
+                trailing: selectedId == promo.id
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () {
+                  ref.read(selectedPromoIdProvider.notifier).state = promo.id;
+                  Navigator.of(context).pop();
+                },
+              ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _CustomerSelectorRow extends ConsumerWidget {

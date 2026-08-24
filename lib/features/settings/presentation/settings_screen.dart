@@ -10,6 +10,7 @@ import 'cashier_settings_screen.dart';
 import 'device_settings_screen.dart';
 import 'payment_settings_screen.dart';
 import 'product_management_screen.dart';
+import 'promo_management_screen.dart';
 import 'receipt_tax_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -74,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.local_offer_outlined,
             title: 'Promo & Diskon',
             subtitle: 'Diskon manual, voucher, aturan refund',
-            onTap: () {},
+            onTap: () => context.push(PromoManagementScreen.routePath),
           ),
           const SizedBox(height: 12),
           const _SectionLabel('AKUN'),

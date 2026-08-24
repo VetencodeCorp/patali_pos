@@ -16,6 +16,7 @@ import '../../features/settings/presentation/device_settings_screen.dart';
 import '../../features/settings/presentation/payment_settings_screen.dart';
 import '../../features/settings/presentation/product_form_screen.dart';
 import '../../features/settings/presentation/product_management_screen.dart';
+import '../../features/settings/presentation/promo_management_screen.dart';
 import '../../features/settings/presentation/receipt_tax_settings_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
@@ -102,6 +103,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: PaymentSettingsScreen.routePath,
       builder: (context, state) => const PaymentSettingsScreen(),
+    ),
+    GoRoute(
+      path: PromoManagementScreen.routePath,
+      builder: (context, state) => const PromoManagementScreen(),
     ),
     GoRoute(
       path: ReportsScreen.routePath,
