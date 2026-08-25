@@ -13,6 +13,7 @@ void main() {
       barcode: '899001',
       trackStock: false,
       stockQty: 0,
+      minStock: 0,
       isActive: true,
       createdAt: now,
     );

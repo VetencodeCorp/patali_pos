@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/dev_login_screen.dart';
 import '../../features/customers/presentation/customer_form_screen.dart';
 import '../../features/customers/presentation/customer_management_screen.dart';
+import '../../features/inventory/presentation/stock_movement_screen.dart';
 import '../../features/kitchen/presentation/kitchen_display_screen.dart';
 import '../../features/orders/presentation/order_history_screen.dart';
 import '../../features/orders/presentation/receipt_screen.dart';
@@ -35,6 +36,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: PosScreen.routePath,
       builder: (context, state) => const PosScreen(),
+    ),
+    GoRoute(
+      path: PosPaymentScreen.routePath,
+      builder: (context, state) => const PosPaymentScreen(),
     ),
     GoRoute(
       path: OrderHistoryScreen.routePath,
@@ -83,6 +88,10 @@ final appRouter = GoRouter(
       builder: (context, state) {
         return ProductFormScreen(productId: state.pathParameters['productId']!);
       },
+    ),
+    GoRoute(
+      path: StockMovementScreen.routePath,
+      builder: (context, state) => const StockMovementScreen(),
     ),
     GoRoute(
       path: CategoryManagementScreen.routePath,

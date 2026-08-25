@@ -87,6 +87,32 @@ void main() {
     expect(order.orderType, 'Meja');
   });
 
+  test('stores manual discount and promo name', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+
+    final order = await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 50000,
+      manualDiscountTotal: 5000,
+      discountTotal: 10000,
+      promoName: 'Diskon Kopi',
+      grandTotal: 40000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 50000,
+          lineTotal: 50000,
+        ),
+      ],
+    );
+
+    expect(order.manualDiscountTotal, 5000);
+    expect(order.discountTotal, 10000);
+    expect(order.promoName, 'Diskon Kopi');
+  });
+
   test('loads customer in history and receipt', () async {
     final session = await cashSessions.openSession(openingCash: 0);
     await database
@@ -263,12 +289,19 @@ void main() {
     );
 
     var updatedProduct = await database.select(database.products).getSingle();
+    var movements = await database.select(database.stockMovements).get();
     expect(updatedProduct.stockQty, 3);
+    expect(movements.single.source, 'sale');
+    expect(movements.single.qtyChange, -2);
 
     await orders.voidOrder(order.id);
 
     updatedProduct = await database.select(database.products).getSingle();
+    movements = await database.select(database.stockMovements).get();
     expect(updatedProduct.stockQty, 5);
+    expect(movements, hasLength(2));
+    expect(movements.last.source, 'void_restore');
+    expect(movements.last.qtyChange, 2);
   });
 
   test('rejects checkout when tracked stock is insufficient', () async {

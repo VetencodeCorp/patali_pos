@@ -67,6 +67,48 @@ class SalesSummaryRepository {
     final nonCashSales = payments
         .where((payment) => payment.method != 'cash')
         .fold<int>(0, (total, payment) => total + payment.amount);
+    final discountTotal = orders.fold<int>(
+      0,
+      (total, order) => total + order.discountTotal,
+    );
+    var manualDiscountTotal = 0;
+    final promoMap = <String, _PromoDiscountAccumulator>{};
+    for (final order in orders) {
+      final promoName = order.promoName?.trim();
+      final hasPromo = promoName != null && promoName.isNotEmpty;
+      final manualDiscount = hasPromo
+          ? order.manualDiscountTotal.clamp(0, order.discountTotal)
+          : order.discountTotal;
+      final promoDiscount = hasPromo
+          ? (order.discountTotal - manualDiscount).clamp(0, order.discountTotal)
+          : 0;
+      manualDiscountTotal += manualDiscount;
+      if (!hasPromo || promoDiscount <= 0) continue;
+      promoMap.putIfAbsent(
+        promoName,
+        () => _PromoDiscountAccumulator(promoName),
+      );
+      promoMap[promoName]!
+        ..orderCount += 1
+        ..discountTotal += promoDiscount;
+    }
+    final promoDiscounts =
+        [
+          for (final promo in promoMap.values)
+            PromoDiscountItem(
+              promoName: promo.promoName,
+              orderCount: promo.orderCount,
+              discountTotal: promo.discountTotal,
+            ),
+        ]..sort((a, b) {
+          final discountCompare = b.discountTotal.compareTo(a.discountTotal);
+          if (discountCompare != 0) return discountCompare;
+          return b.orderCount.compareTo(a.orderCount);
+        });
+    final promoDiscountTotal = promoDiscounts.fold<int>(
+      0,
+      (total, promo) => total + promo.discountTotal,
+    );
 
     return SalesSummary(
       start: start,
@@ -74,6 +116,10 @@ class SalesSummaryRepository {
       totalSales: totalSales,
       cashSales: cashSales,
       nonCashSales: nonCashSales,
+      discountTotal: discountTotal,
+      manualDiscountTotal: manualDiscountTotal,
+      promoDiscountTotal: promoDiscountTotal,
+      promoDiscounts: promoDiscounts,
       orderCount: orders.length,
     );
   }
@@ -142,6 +188,10 @@ class SalesSummary {
     required this.totalSales,
     required this.cashSales,
     required this.nonCashSales,
+    required this.discountTotal,
+    required this.manualDiscountTotal,
+    required this.promoDiscountTotal,
+    required this.promoDiscounts,
     required this.orderCount,
   });
 
@@ -150,9 +200,25 @@ class SalesSummary {
   final int totalSales;
   final int cashSales;
   final int nonCashSales;
+  final int discountTotal;
+  final int manualDiscountTotal;
+  final int promoDiscountTotal;
+  final List<PromoDiscountItem> promoDiscounts;
   final int orderCount;
 
   int get averageOrderValue => orderCount == 0 ? 0 : totalSales ~/ orderCount;
+}
+
+class PromoDiscountItem {
+  const PromoDiscountItem({
+    required this.promoName,
+    required this.orderCount,
+    required this.discountTotal,
+  });
+
+  final String promoName;
+  final int orderCount;
+  final int discountTotal;
 }
 
 class ProductSalesItem {
@@ -182,4 +248,12 @@ class _ProductSalesAccumulator {
   final Set<String> orderIds = {};
   int qty = 0;
   int sales = 0;
+}
+
+class _PromoDiscountAccumulator {
+  _PromoDiscountAccumulator(this.promoName);
+
+  final String promoName;
+  int orderCount = 0;
+  int discountTotal = 0;
 }

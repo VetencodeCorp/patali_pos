@@ -30,6 +30,7 @@ void main() {
       cost: 3000,
       trackStock: true,
       stockQty: 12,
+      minStock: 5,
     );
 
     expect(product.name, 'Es Teh');
@@ -41,6 +42,7 @@ void main() {
     expect(product.cost, 3000);
     expect(product.trackStock, isTrue);
     expect(product.stockQty, 12);
+    expect(product.minStock, 5);
 
     final activeProducts = await products.watchActiveProducts().first;
 
@@ -65,6 +67,7 @@ void main() {
       cost: 3500,
       trackStock: true,
       stockQty: 7,
+      minStock: 3,
     );
 
     var activeProducts = await products.watchActiveProducts().first;
@@ -78,6 +81,7 @@ void main() {
     expect(activeProducts.single.cost, 3500);
     expect(activeProducts.single.trackStock, isTrue);
     expect(activeProducts.single.stockQty, 7);
+    expect(activeProducts.single.minStock, 3);
 
     await products.deactivateProduct(product.id);
     activeProducts = await products.watchActiveProducts().first;
@@ -122,5 +126,26 @@ void main() {
         .first;
 
     expect(drinkProducts.single.name, 'Es Teh');
+  });
+
+  test('watches low stock products', () async {
+    await products.createProduct(
+      name: 'Kopi Susu',
+      price: 18000,
+      trackStock: true,
+      stockQty: 3,
+      minStock: 5,
+    );
+    await products.createProduct(
+      name: 'Latte',
+      price: 20000,
+      trackStock: true,
+      stockQty: 12,
+      minStock: 5,
+    );
+
+    final lowStock = await products.watchLowStockProducts().first;
+
+    expect(lowStock.single.name, 'Kopi Susu');
   });
 }

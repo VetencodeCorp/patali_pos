@@ -128,9 +128,28 @@ class SalesSummaryScreen extends ConsumerWidget {
                             value: currency.format(data.averageOrderValue),
                             tint: const Color(0xFFEAF3FF),
                           ),
+                          _MetricCard(
+                            icon: Icons.discount_outlined,
+                            title: 'Total diskon',
+                            value: currency.format(data.discountTotal),
+                            tint: const Color(0xFFFFE8EA),
+                          ),
+                          _MetricCard(
+                            icon: Icons.local_offer_outlined,
+                            title: 'Diskon promo',
+                            value: currency.format(data.promoDiscountTotal),
+                            tint: const Color(0xFFEAF7EE),
+                          ),
                         ],
                       );
                     },
+                  ),
+                  const SizedBox(height: 14),
+                  _DiscountBreakdown(
+                    manualDiscount: data.manualDiscountTotal,
+                    promoDiscount: data.promoDiscountTotal,
+                    promos: data.promoDiscounts,
+                    currency: currency,
                   ),
                 ],
               );
@@ -165,6 +184,150 @@ class SalesSummaryScreen extends ConsumerWidget {
       pickedDate.year,
       pickedDate.month,
       pickedDate.day,
+    );
+  }
+}
+
+class _DiscountBreakdown extends StatelessWidget {
+  const _DiscountBreakdown({
+    required this.manualDiscount,
+    required this.promoDiscount,
+    required this.promos,
+    required this.currency,
+  });
+
+  final int manualDiscount;
+  final int promoDiscount;
+  final List<PromoDiscountItem> promos;
+  final NumberFormat currency;
+
+  @override
+  Widget build(BuildContext context) {
+    return PataliCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE8EA),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.discount_outlined,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Rincian Diskon',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _DiscountLine(
+            label: 'Manual',
+            value: currency.format(manualDiscount),
+            countLabel: 'Input kasir',
+          ),
+          const SizedBox(height: 8),
+          _DiscountLine(
+            label: 'Promo',
+            value: currency.format(promoDiscount),
+            countLabel: '${promos.length} promo',
+          ),
+          if (promos.isEmpty) ...[
+            const SizedBox(height: 14),
+            const Text(
+              'Belum ada promo dipakai di tanggal ini.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 14),
+            for (final promo in promos.take(5)) ...[
+              _DiscountLine(
+                label: promo.promoName,
+                value: currency.format(promo.discountTotal),
+                countLabel: '${promo.orderCount} transaksi',
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DiscountLine extends StatelessWidget {
+  const _DiscountLine({
+    required this.label,
+    required this.value,
+    required this.countLabel,
+  });
+
+  final String label;
+  final String value;
+  final String countLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E5E1)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  countLabel,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

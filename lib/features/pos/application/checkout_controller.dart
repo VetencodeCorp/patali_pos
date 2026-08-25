@@ -77,7 +77,9 @@ class CheckoutController extends AsyncNotifier<void> {
           invoicePrefix: cashierSettings.invoicePrefix,
           resetInvoiceDaily: cashierSettings.resetInvoiceDaily,
           subtotal: subtotal,
+          manualDiscountTotal: manualDiscount,
           discountTotal: discountTotal,
+          promoName: promoDiscount > 0 ? promo?.name : null,
           taxTotal: taxTotal + serviceTotal,
           grandTotal: grandTotal,
         );
@@ -85,6 +87,7 @@ class CheckoutController extends AsyncNotifier<void> {
     ref.read(cartControllerProvider.notifier).clear();
     ref.read(cartDiscountProvider.notifier).state = 0;
     ref.read(selectedPromoIdProvider.notifier).state = null;
+    ref.read(cashTenderedProvider.notifier).state = null;
     ref.read(selectedPaymentMethodProvider.notifier).state =
         cashierSettings.defaultPaymentMethod;
     ref.read(selectedOrderTypeProvider.notifier).state =

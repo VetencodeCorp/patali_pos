@@ -14,6 +14,7 @@ void main() {
         status: 'completed',
         orderType: 'takeaway',
         subtotal: 36000,
+        manualDiscountTotal: 0,
         discountTotal: 0,
         taxTotal: 0,
         grandTotal: 36000,
@@ -60,5 +61,54 @@ void main() {
     expect(text, contains('Kopi Susu'));
     expect(text, contains('TOTAL                  Rp 36.000'));
     expect(lines.every((line) => line.length <= 32), isTrue);
+  });
+
+  test('prints manual discount and promo name', () {
+    final now = DateTime(2026, 8, 22, 10, 0);
+    final receipt = OrderReceipt(
+      order: Order(
+        id: 'order-1',
+        orderNumber: 'INV-20260822-100000',
+        status: 'completed',
+        orderType: 'takeaway',
+        subtotal: 50000,
+        manualDiscountTotal: 5000,
+        discountTotal: 10000,
+        promoName: 'Diskon Kopi',
+        taxTotal: 0,
+        grandTotal: 40000,
+        orderedAt: now,
+        createdAt: now,
+      ),
+      items: [
+        OrderItem(
+          id: 'item-1',
+          orderId: 'order-1',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 50000,
+          discountTotal: 0,
+          lineTotal: 50000,
+          kitchenStatus: 'pending',
+          createdAt: now,
+        ),
+      ],
+      payments: [
+        Payment(
+          id: 'payment-1',
+          orderId: 'order-1',
+          method: 'cash',
+          amount: 40000,
+          status: 'paid',
+          paidAt: now,
+          createdAt: now,
+        ),
+      ],
+    );
+
+    final text = ReceiptTextFormatter().format(receipt);
+
+    expect(text, contains('Diskon Manual'));
+    expect(text, contains('Promo: Diskon Kopi'));
   });
 }

@@ -33,6 +33,11 @@ final filteredProductsProvider = StreamProvider<List<Product>>((ref) {
       });
 });
 
+final lowStockProductsProvider = StreamProvider<List<Product>>((ref) {
+  ref.watch(devSeedProvider);
+  return ref.watch(productRepositoryProvider).watchLowStockProducts();
+});
+
 bool matchesProductSearch(Product product, String query) {
   final normalized = query.trim().toLowerCase();
   if (normalized.isEmpty) return true;
@@ -64,6 +69,26 @@ class ProductRepository {
     return query.watch();
   }
 
+  Stream<List<Product>> watchLowStockProducts() {
+    final query = _database.select(_database.products)
+      ..where(
+        (product) =>
+            product.isActive.equals(true) &
+            product.deletedAt.isNull() &
+            product.trackStock.equals(true),
+      )
+      ..orderBy([
+        (product) => OrderingTerm.asc(product.stockQty),
+        (product) => OrderingTerm.asc(product.name),
+      ]);
+
+    return query.watch().map((products) {
+      return products
+          .where((product) => product.stockQty <= product.minStock)
+          .toList();
+    });
+  }
+
   Future<Product?> getProductById(String id) {
     return (_database.select(
       _database.products,
@@ -81,6 +106,7 @@ class ProductRepository {
     int? cost,
     bool trackStock = false,
     int stockQty = 0,
+    int minStock = 0,
   }) async {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name', 'Nama produk wajib diisi');
@@ -100,6 +126,13 @@ class ProductRepository {
         stockQty,
         'stockQty',
         'Stok tidak boleh negatif',
+      );
+    }
+    if (minStock < 0) {
+      throw ArgumentError.value(
+        minStock,
+        'minStock',
+        'Stok minimum tidak boleh negatif',
       );
     }
 
@@ -125,6 +158,7 @@ class ProductRepository {
             cost: Value(cost),
             trackStock: Value(trackStock),
             stockQty: Value(trackStock ? stockQty : 0),
+            minStock: Value(trackStock ? minStock : 0),
           ),
         );
 
@@ -145,6 +179,7 @@ class ProductRepository {
     int? cost,
     bool trackStock = false,
     int stockQty = 0,
+    int minStock = 0,
   }) async {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name', 'Nama produk wajib diisi');
@@ -164,6 +199,13 @@ class ProductRepository {
         stockQty,
         'stockQty',
         'Stok tidak boleh negatif',
+      );
+    }
+    if (minStock < 0) {
+      throw ArgumentError.value(
+        minStock,
+        'minStock',
+        'Stok minimum tidak boleh negatif',
       );
     }
 
@@ -187,6 +229,7 @@ class ProductRepository {
         cost: Value(cost),
         trackStock: Value(trackStock),
         stockQty: Value(trackStock ? stockQty : 0),
+        minStock: Value(trackStock ? minStock : 0),
         updatedAt: Value(DateTime.now()),
       ),
     );

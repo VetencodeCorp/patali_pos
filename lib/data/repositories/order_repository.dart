@@ -212,7 +212,9 @@ class OrderRepository {
     String invoicePrefix = 'INV',
     bool resetInvoiceDaily = true,
     required int subtotal,
+    int manualDiscountTotal = 0,
     required int discountTotal,
+    String? promoName,
     int taxTotal = 0,
     required int grandTotal,
   }) async {
@@ -243,7 +245,9 @@ class OrderRepository {
               orderNumber: orderNumber,
               orderType: Value(orderType),
               subtotal: Value(subtotal),
+              manualDiscountTotal: Value(manualDiscountTotal),
               discountTotal: Value(discountTotal),
+              promoName: Value(promoName),
               taxTotal: Value(taxTotal),
               grandTotal: Value(grandTotal),
               orderedAt: now,
@@ -293,7 +297,9 @@ class OrderRepository {
                 'order_type': orderType,
                 'payment_method': paymentMethod,
                 'subtotal': subtotal,
+                'manual_discount_total': manualDiscountTotal,
                 'discount_total': discountTotal,
+                'promo_name': promoName,
                 'tax_total': taxTotal,
                 'grand_total': grandTotal,
               }),
@@ -378,6 +384,15 @@ class OrderRepository {
           updatedAt: Value(now),
         ),
       );
+      await _insertStockMovement(
+        product: product,
+        qtyChange: -item.qty,
+        stockAfter: product.stockQty - item.qty,
+        type: 'out',
+        source: 'sale',
+        note: item.productName,
+        createdAt: now,
+      );
     }
   }
 
@@ -402,7 +417,42 @@ class OrderRepository {
           updatedAt: Value(now),
         ),
       );
+      await _insertStockMovement(
+        product: product,
+        qtyChange: item.qty,
+        stockAfter: product.stockQty + item.qty,
+        type: 'in',
+        source: 'void_restore',
+        note: item.productName,
+        createdAt: now,
+      );
     }
+  }
+
+  Future<void> _insertStockMovement({
+    required Product product,
+    required int qtyChange,
+    required int stockAfter,
+    required String type,
+    required String source,
+    required String note,
+    required DateTime createdAt,
+  }) {
+    return _database
+        .into(_database.stockMovements)
+        .insert(
+          StockMovementsCompanion.insert(
+            id: _uuid.v4(),
+            productId: product.id,
+            productName: product.name,
+            type: type,
+            qtyChange: qtyChange,
+            stockAfter: stockAfter,
+            source: Value(source),
+            note: Value(note),
+            createdAt: Value(createdAt),
+          ),
+        );
   }
 
   Future<String> _buildOrderNumber(

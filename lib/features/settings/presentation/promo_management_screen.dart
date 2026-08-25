@@ -192,11 +192,6 @@ Future<void> _showPromoSheet(
   WidgetRef ref, [
   Promo? promo,
 ]) async {
-  final nameController = TextEditingController(text: promo?.name ?? '');
-  final valueController = TextEditingController(
-    text: promo?.value.toString() ?? '',
-  );
-  var type = promo?.type ?? 'amount';
   final isEditing = promo != null;
 
   final saved = await showModalBottomSheet<bool>(
@@ -204,97 +199,146 @@ Future<void> _showPromoSheet(
     isScrollControlled: true,
     showDragHandle: true,
     useSafeArea: true,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setModalState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                Text(
-                  isEditing ? 'Edit Promo' : 'Tambah Promo',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _LabeledTextField(
-                  label: 'Nama Promo',
-                  hint: 'Contoh: Diskon Opening',
-                  controller: nameController,
-                  autofocus: true,
-                ),
-                const SizedBox(height: 12),
-                _LabeledField(
-                  label: 'Tipe Diskon',
-                  child: SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(value: 'amount', label: Text('Nominal')),
-                      ButtonSegment(value: 'percent', label: Text('Persen')),
-                    ],
-                    selected: {type},
-                    onSelectionChanged: (value) {
-                      setModalState(() => type = value.single);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _LabeledTextField(
-                  label: type == 'amount' ? 'Nominal Diskon' : 'Persen Diskon',
-                  hint: type == 'amount' ? 'Contoh: 10000' : 'Contoh: 10',
-                  controller: valueController,
-                  keyboardType: TextInputType.number,
-                  prefixText: type == 'amount' ? 'Rp ' : null,
-                  suffixText: type == 'percent' ? '%' : null,
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: () async {
-                    final value = _parseMoney(valueController.text);
-                    if (isEditing) {
-                      await ref
-                          .read(promoRepositoryProvider)
-                          .updatePromo(
-                            id: promo.id,
-                            name: nameController.text,
-                            type: type,
-                            value: value,
-                          );
-                    } else {
-                      await ref
-                          .read(promoRepositoryProvider)
-                          .createPromo(
-                            name: nameController.text,
-                            type: type,
-                            value: value,
-                          );
-                    }
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop(true);
-                  },
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Simpan Promo'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
+    builder: (context) => _PromoSheet(promo: promo),
   );
-
-  nameController.dispose();
-  valueController.dispose();
 
   if (!context.mounted || saved != true) return;
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(isEditing ? 'Promo diperbarui' : 'Promo ditambah')),
   );
+}
+
+class _PromoSheet extends ConsumerStatefulWidget {
+  const _PromoSheet({this.promo});
+
+  final Promo? promo;
+
+  @override
+  ConsumerState<_PromoSheet> createState() => _PromoSheetState();
+}
+
+class _PromoSheetState extends ConsumerState<_PromoSheet> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _valueController;
+  late String _type;
+
+  bool get _isEditing => widget.promo != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.promo?.name ?? '');
+    _valueController = TextEditingController(
+      text: widget.promo?.value.toString() ?? '',
+    );
+    _type = widget.promo?.type ?? 'amount';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _valueController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+      ),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Text(
+            _isEditing ? 'Edit Promo' : 'Tambah Promo',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 18),
+          _LabeledTextField(
+            label: 'Nama Promo',
+            hint: 'Contoh: Diskon Opening',
+            controller: _nameController,
+            autofocus: true,
+          ),
+          const SizedBox(height: 12),
+          _LabeledField(
+            label: 'Tipe Diskon',
+            child: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'amount', label: Text('Nominal')),
+                ButtonSegment(value: 'percent', label: Text('Persen')),
+              ],
+              selected: {_type},
+              onSelectionChanged: (value) {
+                setState(() => _type = value.single);
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          _LabeledTextField(
+            label: _type == 'amount' ? 'Nominal Diskon' : 'Persen Diskon',
+            hint: _type == 'amount' ? 'Contoh: 10000' : 'Contoh: 10',
+            controller: _valueController,
+            keyboardType: TextInputType.number,
+            prefixText: _type == 'amount' ? 'Rp ' : null,
+            suffixText: _type == 'percent' ? '%' : null,
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: _savePromo,
+            icon: const Icon(Icons.save_outlined),
+            label: const Text('Simpan Promo'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _savePromo() async {
+    try {
+      final value = _parseMoney(_valueController.text);
+      final validationError = _validatePromoInput(
+        name: _nameController.text,
+        type: _type,
+        value: value,
+      );
+      if (validationError != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(validationError)));
+        return;
+      }
+
+      final repository = ref.read(promoRepositoryProvider);
+      if (_isEditing) {
+        await repository.updatePromo(
+          id: widget.promo!.id,
+          name: _nameController.text,
+          type: _type,
+          value: value,
+        );
+      } else {
+        await repository.createPromo(
+          name: _nameController.text,
+          type: _type,
+          value: value,
+        );
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menyimpan promo: $error')));
+    }
+  }
 }
 
 Future<void> _confirmDeactivatePromo(
@@ -418,6 +462,17 @@ class _LabeledField extends StatelessWidget {
 
 int _parseMoney(String value) {
   return int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+}
+
+String? _validatePromoInput({
+  required String name,
+  required String type,
+  required int value,
+}) {
+  if (name.trim().isEmpty) return 'Nama promo wajib diisi';
+  if (value <= 0) return 'Nilai promo harus lebih dari 0';
+  if (type == 'percent' && value > 100) return 'Persen maksimal 100';
+  return null;
 }
 
 enum _PromoAction { edit, deactivate, delete }

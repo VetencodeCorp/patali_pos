@@ -115,6 +115,7 @@ void main() {
                 price: 18000,
                 trackStock: false,
                 stockQty: 0,
+                minStock: 0,
                 isActive: true,
                 createdAt: now,
               ),
@@ -135,17 +136,17 @@ void main() {
     await tester.tap(find.text('Masuk sebagai Owner'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Patali Demo Outlet'), findsOneWidget);
     expect(find.text('Kopi Susu'), findsOneWidget);
-    expect(find.textContaining('Kasir sedang buka'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.add_circle));
+    await tester.ensureVisible(find.text('Kopi Susu'));
+    await tester.tap(find.text('Kopi Susu'));
     await tester.pumpAndSettle();
 
-    expect(find.text('1 Produk'), findsOneWidget);
-    await tester.tap(find.text('1 Produk'));
+    expect(find.text('1 produk dipilih'), findsOneWidget);
+    await tester.tap(find.text('1 produk dipilih'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Pembayaran'), findsWidgets);
     expect(find.text('Subtotal (1 item)'), findsOneWidget);
     expect(find.text('Rp 18.000'), findsWidgets);
 
@@ -157,8 +158,9 @@ void main() {
     expect(find.text('Subtotal (2 item)'), findsOneWidget);
     expect(find.text('Rp 36.000'), findsWidgets);
 
-    await tester.ensureVisible(find.text('Checkout'));
-    await tester.tap(find.text('Checkout'));
+    await tester.scrollUntilVisible(find.text('Selesaikan Pembayaran'), 500);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Selesaikan Pembayaran'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Checkout tunai berhasil'), findsOneWidget);

@@ -17,6 +17,9 @@ class ReceiptTextFormatter {
         ? settings?.outletPhone
         : null;
 
+    final manualDiscount = receipt.order.manualDiscountTotal;
+    final promoDiscount =
+        receipt.order.discountTotal - receipt.order.manualDiscountTotal;
     final lines = <String>[
       _center(outletName.toUpperCase()),
       if (header != null && header.isNotEmpty) _center(header),
@@ -37,7 +40,16 @@ class ReceiptTextFormatter {
       ],
       _line(),
       _columns('Subtotal', _money(receipt.order.subtotal)),
-      _columns('Diskon', _money(receipt.order.discountTotal)),
+      if (manualDiscount > 0) _columns('Diskon Manual', _money(manualDiscount)),
+      if (promoDiscount > 0)
+        _columns(
+          _discountLabel(receipt.order.promoName),
+          _money(promoDiscount),
+        ),
+      if (manualDiscount == 0 &&
+          promoDiscount <= 0 &&
+          receipt.order.discountTotal > 0)
+        _columns('Diskon', _money(receipt.order.discountTotal)),
       _columns('Pajak/Service', _money(receipt.order.taxTotal)),
       _columns('TOTAL', _money(receipt.order.grandTotal)),
       _line(),
@@ -93,5 +105,11 @@ class ReceiptTextFormatter {
         '${value.year} '
         '${value.hour.toString().padLeft(2, '0')}:'
         '${value.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _discountLabel(String? promoName) {
+    final name = promoName?.trim();
+    if (name == null || name.isEmpty) return 'Promo';
+    return 'Promo: $name';
   }
 }

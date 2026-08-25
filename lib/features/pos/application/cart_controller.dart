@@ -12,6 +12,8 @@ final selectedPromoIdProvider = StateProvider<String?>((ref) => null);
 
 final selectedPaymentMethodProvider = StateProvider<String>((ref) => 'cash');
 
+final cashTenderedProvider = StateProvider<int?>((ref) => null);
+
 final selectedOrderTypeProvider = StateProvider<String>((ref) => 'Bungkus');
 
 final selectedCustomerIdProvider = StateProvider<String?>((ref) => null);

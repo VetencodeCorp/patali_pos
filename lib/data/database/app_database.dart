@@ -32,10 +32,27 @@ class Products extends Table {
   IntColumn get cost => integer().nullable()();
   BoolColumn get trackStock => boolean().withDefault(const Constant(false))();
   IntColumn get stockQty => integer().withDefault(const Constant(0))();
+  IntColumn get minStock => integer().withDefault(const Constant(0))();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class StockMovements extends Table {
+  TextColumn get id => text()();
+  TextColumn get productId => text().references(Products, #id)();
+  TextColumn get productName => text()();
+  TextColumn get type => text()();
+  IntColumn get qtyChange => integer()();
+  IntColumn get stockAfter => integer()();
+  TextColumn get source => text().nullable()();
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -135,7 +152,10 @@ class Orders extends Table {
   TextColumn get status => text().withDefault(const Constant('completed'))();
   TextColumn get orderType => text().withDefault(const Constant('takeaway'))();
   IntColumn get subtotal => integer().withDefault(const Constant(0))();
+  IntColumn get manualDiscountTotal =>
+      integer().withDefault(const Constant(0))();
   IntColumn get discountTotal => integer().withDefault(const Constant(0))();
+  TextColumn get promoName => text().nullable()();
   IntColumn get taxTotal => integer().withDefault(const Constant(0))();
   IntColumn get grandTotal => integer().withDefault(const Constant(0))();
   TextColumn get note => text().nullable()();
@@ -304,6 +324,7 @@ class Promos extends Table {
   tables: [
     Categories,
     Products,
+    StockMovements,
     Roles,
     Permissions,
     RolePermissions,
@@ -327,7 +348,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -359,6 +380,16 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 9) {
         await migrator.createTable(promos);
+      }
+      if (from < 10) {
+        await migrator.addColumn(orders, orders.manualDiscountTotal);
+        await migrator.addColumn(orders, orders.promoName);
+      }
+      if (from < 11) {
+        await migrator.createTable(stockMovements);
+      }
+      if (from < 12) {
+        await migrator.addColumn(products, products.minStock);
       }
     },
   );

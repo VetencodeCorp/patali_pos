@@ -11,6 +11,7 @@ import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../shared/widgets/patali_card.dart';
 import '../../../shared/widgets/patali_shell.dart';
+import '../../inventory/presentation/stock_movement_screen.dart';
 import 'product_form_screen.dart';
 
 class ProductManagementScreen extends ConsumerStatefulWidget {
@@ -130,16 +131,56 @@ class _ProductsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categoryItems = categories.valueOrNull ?? const [];
+    final lowStock = ref.watch(lowStockProductsProvider);
 
     return products.when(
       data: (items) {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _OutlineActionButton(
-              label: 'Tambah Produk',
-              icon: Icons.add_box_outlined,
-              onPressed: () => context.push(ProductFormScreen.createRoutePath),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final twoColumns = constraints.maxWidth >= 560;
+                final buttons = [
+                  _OutlineActionButton(
+                    label: 'Tambah Produk',
+                    icon: Icons.add_box_outlined,
+                    onPressed: () =>
+                        context.push(ProductFormScreen.createRoutePath),
+                  ),
+                  _OutlineActionButton(
+                    label: 'Pergerakan Stok',
+                    icon: Icons.inventory_outlined,
+                    onPressed: () =>
+                        context.push(StockMovementScreen.routePath),
+                  ),
+                ];
+                if (!twoColumns) {
+                  return Column(
+                    children: [
+                      buttons[0],
+                      const SizedBox(height: 10),
+                      buttons[1],
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: buttons[0]),
+                    const SizedBox(width: 10),
+                    Expanded(child: buttons[1]),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 18),
+            lowStock.when(
+              data: (stockItems) => _LowStockPanel(products: stockItems),
+              loading: () => const SizedBox.shrink(),
+              error: (error, stackTrace) => Text(
+                'Gagal memuat stok menipis: $error',
+                style: const TextStyle(color: AppColors.danger),
+              ),
             ),
             const SizedBox(height: 18),
             const _ProductsHeader(),
@@ -352,9 +393,8 @@ class _ProductRow extends StatelessWidget {
       symbol: 'Rp ',
       decimalDigits: 0,
     );
-    final stockText = product.trackStock
-        ? 'Stok ${product.stockQty}'
-        : 'Non stok';
+    final stockText = _stockLabel(product);
+    final stockColor = _stockColor(product);
 
     return PataliCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -402,12 +442,9 @@ class _ProductRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   stockText,
-                  style: TextStyle(
-                    color: product.trackStock && product.stockQty <= 0
-                        ? AppColors.danger
-                        : AppColors.textSecondary,
+                  style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                  ),
+                  ).copyWith(color: stockColor),
                 ),
               ],
             ),
@@ -417,6 +454,76 @@ class _ProductRow extends StatelessWidget {
             onDeactivate: onDeactivate,
             onDelete: onDelete,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LowStockPanel extends StatelessWidget {
+  const _LowStockPanel({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+
+    return PataliCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE8EA),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: AppColors.danger,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${products.length} Produk Stok Menipis',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (final product in products.take(4)) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _stockLabel(product),
+                  style: TextStyle(
+                    color: _stockColor(product),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
     );
@@ -784,6 +891,22 @@ String _categoryName(List<Category> categories, Product product) {
     if (category.id == product.categoryId) return category.name;
   }
   return 'Kategori tidak ditemukan';
+}
+
+String _stockLabel(Product product) {
+  if (!product.trackStock) return 'Non stok';
+  if (product.stockQty <= 0) return 'Stok habis';
+  if (product.stockQty <= product.minStock) {
+    return 'Stok ${product.stockQty} / min ${product.minStock}';
+  }
+  return 'Stok ${product.stockQty}';
+}
+
+Color _stockColor(Product product) {
+  if (!product.trackStock) return AppColors.textSecondary;
+  if (product.stockQty <= 0) return AppColors.danger;
+  if (product.stockQty <= product.minStock) return const Color(0xFFB7791F);
+  return AppColors.textSecondary;
 }
 
 enum _RowAction { edit, deactivate, delete }

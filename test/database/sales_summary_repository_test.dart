@@ -75,6 +75,58 @@ void main() {
     expect(summary.cashSales, 30000);
     expect(summary.orderCount, 1);
     expect(summary.averageOrderValue, 30000);
+    expect(summary.discountTotal, 6000);
+    expect(summary.manualDiscountTotal, 6000);
+    expect(summary.promoDiscountTotal, 0);
+    expect(summary.promoDiscounts, isEmpty);
+  });
+
+  test('summarizes manual and promo discounts', () async {
+    final session = await cashSessions.openSession(openingCash: 0);
+
+    await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 50000,
+      manualDiscountTotal: 5000,
+      discountTotal: 10000,
+      promoName: 'Diskon Kopi',
+      grandTotal: 40000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-kopi-susu',
+          productName: 'Kopi Susu',
+          qty: 1,
+          unitPrice: 50000,
+          lineTotal: 50000,
+        ),
+      ],
+    );
+    await orders.createCashOrder(
+      cashSessionId: session.id,
+      subtotal: 30000,
+      manualDiscountTotal: 0,
+      discountTotal: 3000,
+      promoName: 'Diskon Kopi',
+      grandTotal: 27000,
+      items: const [
+        CreateOrderItem(
+          productId: 'prod-latte',
+          productName: 'Latte',
+          qty: 1,
+          unitPrice: 30000,
+          lineTotal: 30000,
+        ),
+      ],
+    );
+
+    final summary = await salesSummary.getDailySummary(DateTime.now());
+
+    expect(summary.discountTotal, 13000);
+    expect(summary.manualDiscountTotal, 5000);
+    expect(summary.promoDiscountTotal, 8000);
+    expect(summary.promoDiscounts.single.promoName, 'Diskon Kopi');
+    expect(summary.promoDiscounts.single.orderCount, 2);
+    expect(summary.promoDiscounts.single.discountTotal, 8000);
   });
 
   test('summarizes non-cash payment methods', () async {

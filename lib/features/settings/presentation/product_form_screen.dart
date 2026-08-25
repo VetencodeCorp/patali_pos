@@ -46,6 +46,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
   final _stockController = TextEditingController(text: '0');
+  final _minStockController = TextEditingController(text: '0');
 
   String? _selectedCategoryId;
   String? _imagePath;
@@ -64,6 +65,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _descriptionController.dispose();
     _costController.dispose();
     _stockController.dispose();
+    _minStockController.dispose();
     super.dispose();
   }
 
@@ -98,6 +100,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               descriptionController: _descriptionController,
               costController: _costController,
               stockController: _stockController,
+              minStockController: _minStockController,
               onCategoryChanged: (value) {
                 setState(() => _selectedCategoryId = value);
               },
@@ -130,6 +133,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _descriptionController.text = product.description ?? '';
     _costController.text = product.cost?.toString() ?? '';
     _stockController.text = product.stockQty.toString();
+    _minStockController.text = product.minStock.toString();
     _selectedCategoryId = product.categoryId;
     _imagePath = product.imagePath;
     _trackStock = product.trackStock;
@@ -182,6 +186,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           ? null
           : _parseMoney(_costController.text);
       final stockQty = _parseMoney(_stockController.text);
+      final minStock = _parseMoney(_minStockController.text);
 
       if (_isEditing && product != null) {
         await ref
@@ -198,6 +203,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               cost: cost,
               trackStock: _trackStock,
               stockQty: stockQty,
+              minStock: minStock,
             );
       } else {
         await ref
@@ -213,6 +219,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               cost: cost,
               trackStock: _trackStock,
               stockQty: stockQty,
+              minStock: minStock,
             );
       }
       if (!mounted) return;
@@ -249,6 +256,7 @@ class _ProductFormBody extends StatelessWidget {
     required this.descriptionController,
     required this.costController,
     required this.stockController,
+    required this.minStockController,
     required this.onCategoryChanged,
     required this.onTrackStockChanged,
     required this.onPickImage,
@@ -268,6 +276,7 @@ class _ProductFormBody extends StatelessWidget {
   final TextEditingController descriptionController;
   final TextEditingController costController;
   final TextEditingController stockController;
+  final TextEditingController minStockController;
   final ValueChanged<String?> onCategoryChanged;
   final ValueChanged<bool> onTrackStockChanged;
   final VoidCallback onPickImage;
@@ -404,6 +413,13 @@ class _ProductFormBody extends StatelessWidget {
                   label: 'Stok',
                   hint: 'Contoh: 24',
                   controller: stockController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                _LabeledTextField(
+                  label: 'Stok Minimum',
+                  hint: 'Contoh: 5',
+                  controller: minStockController,
                   keyboardType: TextInputType.number,
                 ),
               ],

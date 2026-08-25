@@ -43,6 +43,9 @@ class ReceiptScreen extends ConsumerWidget {
       body: SafeArea(
         child: receipt.when(
           data: (data) {
+            final manualDiscount = data.order.manualDiscountTotal;
+            final promoDiscount =
+                data.order.discountTotal - data.order.manualDiscountTotal;
             final thermalText = ReceiptTextFormatter().format(
               data,
               settings: settings,
@@ -82,10 +85,23 @@ class ReceiptScreen extends ConsumerWidget {
                   label: 'Subtotal',
                   value: currency.format(data.order.subtotal),
                 ),
-                _ReceiptRow(
-                  label: 'Diskon',
-                  value: currency.format(data.order.discountTotal),
-                ),
+                if (manualDiscount > 0)
+                  _ReceiptRow(
+                    label: 'Diskon Manual',
+                    value: '-${currency.format(manualDiscount)}',
+                  ),
+                if (promoDiscount > 0)
+                  _ReceiptRow(
+                    label: _promoReceiptLabel(data.order.promoName),
+                    value: '-${currency.format(promoDiscount)}',
+                  ),
+                if (manualDiscount == 0 &&
+                    promoDiscount <= 0 &&
+                    data.order.discountTotal > 0)
+                  _ReceiptRow(
+                    label: 'Diskon',
+                    value: '-${currency.format(data.order.discountTotal)}',
+                  ),
                 _ReceiptRow(
                   label: 'Pajak/Service',
                   value: currency.format(data.order.taxTotal),
@@ -159,6 +175,12 @@ class ReceiptScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _promoReceiptLabel(String? promoName) {
+  final name = promoName?.trim();
+  if (name == null || name.isEmpty) return 'Promo';
+  return 'Promo: $name';
 }
 
 class _ReceiptRow extends StatelessWidget {
